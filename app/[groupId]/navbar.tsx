@@ -13,7 +13,7 @@ export default function Navbar(props: Props) {
             <h1 className="text-xl font-extralight text-gray-500">Praygram</h1>
           </a>
         </div>
-        <div className="md:flex md:items-center md:justify-center md:gap-5">
+        <div className="md:flex md:items-center md:justify-center md:gap-5 text-gray-500">
           <p>{groupTitle}</p>
         </div>
       </div>
