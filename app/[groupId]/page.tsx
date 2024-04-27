@@ -10,7 +10,7 @@ export default function GroupHome(props: Props) {
     params: { groupId },
   } = props;
   return (
-    <div className="flex min-h-screen flex-col items-center justify-between px-4">
+    <div className="flex min-h-screen flex-col items-center justify-start px-4">
       <header>
         <Navbar groupTitle="지구촌교회-12지구" />
       </header>
