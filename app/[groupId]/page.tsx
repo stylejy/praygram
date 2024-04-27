@@ -18,22 +18,38 @@ export default function GroupHome(props: Props) {
         <Praycard
           prayer="주님 기도를 잘 모을 수 있는 앱을 만들 수 있게 해주셔서 감사합니다!"
           time="2024년 4월 27일 오후 1시 53분"
-          user="주영"
+          user="YOUNG"
+          prayCount={10}
+        />
+        <Praycard
+          prayer="주님 학원을 허락하여 주시고 잘 이끌어주시니 감사합니다!"
+          time="2024년 4월 27일 오후 1시 53분"
+          user="SUNA"
+          prayCount={3}
+        />
+        <Praycard
+          prayer="주님 재정적으로 풍성하고 넘치도록 허락하여 주셔서 감사합니다!"
+          time="2024년 4월 27일 오후 1시 53분"
+          user="YOUNG"
+          prayCount={6}
         />
         <Praycard
           prayer="주님 기도를 잘 모을 수 있는 앱을 만들 수 있게 해주셔서 감사합니다!"
           time="2024년 4월 27일 오후 1시 53분"
-          user="주영"
+          user="YOUNG"
+          prayCount={3}
         />
         <Praycard
-          prayer="주님 기도를 잘 모을 수 있는 앱을 만들 수 있게 해주셔서 감사합니다!"
+          prayer="주님 학원을 허락하여 주시고 잘 이끌어주시니 감사합니다!"
           time="2024년 4월 27일 오후 1시 53분"
-          user="주영"
+          user="SUNA"
+          prayCount={399}
         />
         <Praycard
-          prayer="주님 기도를 잘 모을 수 있는 앱을 만들 수 있게 해주셔서 감사합니다!"
+          prayer="주님 재정적으로 풍성하고 넘치도록 허락하여 주셔서 감사합니다!"
           time="2024년 4월 27일 오후 1시 53분"
-          user="주영"
+          user="YOUNG"
+          prayCount={10000}
         />
       </main>
     </div>
