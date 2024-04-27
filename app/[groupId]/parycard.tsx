@@ -4,11 +4,10 @@ interface Props {
   prayer: string;
   time: string;
   user: string;
-  prayCount: number;
 }
 
 export default function Praycard(props: Props) {
-  const { prayer, time, user, prayCount } = props;
+  const { prayer, time, user } = props;
   return (
     <div className="flex flex-col items-center justify-center w-full h-fit bg-white/70 rounded-3xl shadow-md backdrop-blur-lg p-5">
       <header className="text-gray-400 font-semibold pb-2">
