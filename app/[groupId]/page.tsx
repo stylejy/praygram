@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Navbar from './navbar';
 import Praycard from './parycard';
 import { FaPlus } from 'react-icons/fa';
+import Link from 'next/link';
 
 interface Props {
   params: { groupId: string };
@@ -53,10 +54,12 @@ export default function GroupHome(props: Props) {
           prayCount={10000}
         />
       </main>
-      <button className="flex items-center fixed bottom-7 right-4 w-30 h-14 px-5 bg-slate-100 text-slate-500 rounded-full shadow-md">
-        <FaPlus className="w-5 h-5 mr-2" />
-        나의 기도 제목
-      </button>
+      <Link href={`/${groupId}/add`}>
+        <button className="flex items-center fixed bottom-7 right-4 w-30 h-14 px-5 bg-slate-100 text-slate-500 rounded-full shadow-md">
+          <FaPlus className="w-5 h-5 mr-2" />
+          나의 기도 제목
+        </button>
+      </Link>
     </div>
   );
 }
