@@ -5,12 +5,10 @@ import { FaPlus } from 'react-icons/fa';
 import Link from 'next/link';
 
 interface Props {
-  params: { groupId: string };
+  params: Promise<{ groupId: string }>;
 }
-export default function GroupHome(props: Props) {
-  const {
-    params: { groupId },
-  } = props;
+export default async function GroupHome({ params }: Props) {
+  const { groupId } = await params;
   return (
     <div className="flex min-h-screen flex-col items-center justify-start px-4">
       <header>

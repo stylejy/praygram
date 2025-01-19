@@ -1,12 +1,11 @@
+import { PageProps } from '@/.next/types/app/page';
 import Navbar from '../navbar';
 
 interface Props {
-  params: { groupId: string };
+  params: Promise<{ groupId: string }>;
 }
-export default function Add(props: Props) {
-  const {
-    params: { groupId },
-  } = props;
+export default async function Add({ params }: Props) {
+  const { groupId } = await params;
   return (
     <div className="flex min-h-screen flex-col items-center justify-start px-4">
       <header>
