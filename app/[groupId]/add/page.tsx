@@ -12,19 +12,7 @@ export default async function Add({ params }: Props) {
         <Navbar groupTitle="목장모임" />
       </header>
       <main className="flex w-full h-full py-28 align-top justify-center">
-        <form className="flex flex-col w-full max-w-sm gap-y-5">
-          <div>
-            <label
-              className="block text-gray-500 font-bold "
-              htmlFor="inline-full-name"
-            >
-              이름
-            </label>
-            <input
-              className="bg-gray-100 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              type="text"
-            />
-          </div>
+        <form className="flex flex-col w-full max-w-xl">
           <div>
             <label
               className="block text-gray-500 font-bold"
