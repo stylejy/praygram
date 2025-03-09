@@ -28,6 +28,14 @@ export default function AuthPage() {
     getUser();
   }, []);
 
+  useEffect(() => {
+    if (authUser) {
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+    }
+  }, [authUser]);
+
   return (
     <div className="flex flex-col items-center justify-center h-screen gap-4">
       {!authUser && (
