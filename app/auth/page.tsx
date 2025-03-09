@@ -25,6 +25,13 @@ export default function AuthPage() {
     });
   };
 
+  const saveMember = (member: any) => {
+    localStorage.setItem('id', member.id);
+    localStorage.setItem('name', member.nickname);
+    localStorage.setItem('group', member.group);
+    localStorage.setItem('isManager', member.is_manager ? 'true' : 'false');
+  };
+
   const processMember = async () => {
     if (authUser === null) {
       return;
@@ -32,17 +39,16 @@ export default function AuthPage() {
     const members = await getMembers(authUser.id);
     if (members && members.length === 0) {
       const response = await createMembers(authUser.name);
-      console.log('response', response);
+      response && saveMember(response[0]);
+    } else {
+      members && saveMember(members[0]);
     }
-    console.log('members', members);
-    /*
+
     if (authUser) {
-      
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = `/${localStorage.getItem('group')}`;
       }, 1500);
     }
-    */
   };
 
   useEffect(() => {
