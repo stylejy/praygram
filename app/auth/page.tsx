@@ -9,6 +9,7 @@ export default function AuthPage() {
   return (
     <div>
       <Auth
+        redirectTo={process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO}
         supabaseClient={supabaseBrowserClient}
         appearance={{
           theme: ThemeMinimal,
