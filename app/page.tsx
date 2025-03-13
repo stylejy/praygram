@@ -1,4 +1,19 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.push('/auth');
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [router]);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-20 p-24">
       <h1 className="font-thin text-9xl text-stone-600">Praygram</h1>
