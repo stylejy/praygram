@@ -19,7 +19,7 @@ export default function Praycard(props: Props) {
         <time className="text-xs text-gray-400">{getFormattedTime(time)}</time>
       </div>
       <article className="text-wrap text-gray-700">
-        <pre>{prayer}</pre>
+        <pre className="whitespace-pre-wrap break-words">{prayer}</pre>
       </article>
       <div className="flex flex-col items-center justify-center mt-4">
         <button className="flex flex-row items-center justify-center w-fit h-10 px-3  bg-slate-100 text-slate-500 border-2 border-slate-500 rounded-3xl">
