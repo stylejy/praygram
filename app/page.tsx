@@ -16,7 +16,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-20 p-24">
-      <h1 className="font-thin text-9xl text-stone-600">Praygram</h1>
+      <h1 className="font-thin text-4xl text-stone-600">Praygram</h1>
       <div role="status">
         <svg
           aria-hidden="true"
