@@ -2,9 +2,8 @@
 
 import { createMembers, getMembers } from '@/apis/members';
 import { createSupabaseBrowserClient } from '@/lib/supabase';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeMinimal } from '@supabase/auth-ui-shared';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export default function AuthPage() {
   const supabaseBrowserClient = createSupabaseBrowserClient();
@@ -51,26 +50,38 @@ export default function AuthPage() {
     }
   };
 
+  const loginWithKakao = async () => {
+    const { error } = await supabaseBrowserClient.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO, // 기존에 쓰던 redirect URL
+      },
+    });
+
+    if (error) {
+      console.error('카카오 로그인 에러:', error.message);
+    }
+  };
+
   useEffect(() => {
-    getAuthUser();
+    //getAuthUser();
   }, []);
 
   useEffect(() => {
-    processMember();
+    //processMember();
   }, [authUser]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-4">
+    <div className="flex flex-col items-center justify-center h-screen gap-4 p-16">
       {!authUser && (
-        <Auth
-          redirectTo={process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO}
-          supabaseClient={supabaseBrowserClient}
-          appearance={{
-            theme: ThemeMinimal,
-          }}
-          onlyThirdPartyProviders
-          providers={['kakao']}
-        />
+        <button onClick={loginWithKakao}>
+          <Image
+            src="/kakao_login.png"
+            alt="카카오 로그인"
+            width={300}
+            height={70}
+          />
+        </button>
       )}
       {authUser && (
         <>
