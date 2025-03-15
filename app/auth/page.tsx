@@ -44,7 +44,7 @@ export default function AuthPage() {
     }
 
     if (authUser) {
-      if (localStorage.getItem('group') === null) {
+      if (localStorage.getItem('group') === 'null') {
         window.location.href = '/join';
         return;
       }
