@@ -21,6 +21,7 @@ export default function Praycard(props: Props) {
       <article className="text-wrap text-gray-700">
         <pre className="whitespace-pre-wrap break-words">{prayer}</pre>
       </article>
+      {/**
       <div className="flex flex-col items-center justify-center mt-4">
         <button className="flex flex-row items-center justify-center w-fit h-10 px-3  bg-slate-100 text-slate-500 border-2 border-slate-500 rounded-3xl">
           <LiaPrayingHandsSolid className="w-4 h-4" />
@@ -32,6 +33,7 @@ export default function Praycard(props: Props) {
           </span>
         )}
       </div>
+    **/}
     </div>
   );
 }
