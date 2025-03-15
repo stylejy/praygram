@@ -64,11 +64,11 @@ export default function AuthPage() {
   };
 
   useEffect(() => {
-    //getAuthUser();
+    getAuthUser();
   }, []);
 
   useEffect(() => {
-    //processMember();
+    processMember();
   }, [authUser]);
 
   return (
