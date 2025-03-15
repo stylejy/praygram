@@ -44,6 +44,10 @@ export default function AuthPage() {
     }
 
     if (authUser) {
+      if (localStorage.getItem('group') === null) {
+        window.location.href = '/join';
+        return;
+      }
       setTimeout(() => {
         window.location.href = `/${localStorage.getItem('group')}`;
       }, 1500);
