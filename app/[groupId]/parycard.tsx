@@ -6,6 +6,7 @@ import { getFormattedTime } from '@/lib/timeFormatter';
 import { queueOfflineAction, isOnline } from '@/lib/offlineStorage';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
 import { PrayerWithReactions } from '@/types/prayer';
+import { createSupabaseBrowserClient } from '@/lib/supabase';
 
 interface Props {
   prayer: PrayerWithReactions & { is_offline?: boolean };
@@ -22,20 +23,52 @@ export default function Praycard(props: Props) {
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [isMyPrayer, setIsMyPrayer] = useState(false);
 
-  // 현재 사용자 ID 가져오기
+  // 현재 사용자 ID 가져오기 (Supabase Auth에서)
   useEffect(() => {
-    const userId = localStorage.getItem('id');
-    setCurrentUserId(userId);
+    const getCurrentUser = async () => {
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
 
-    // 내 기도 카드인지 확인
-    setIsMyPrayer(userId === prayer.author_id);
+        if (!error && user) {
+          setCurrentUserId(user.id);
 
-    // 현재 사용자가 이미 리액션했는지 확인
-    if (userId && prayer.reactions) {
-      const userReaction = prayer.reactions.find((r) => r.user_id === userId);
-      setHasReacted(!!userReaction);
-    }
-  }, [prayer.reactions, prayer.author_id]);
+          // 디버깅을 위한 로그
+          console.log('=== Prayer Card Debug ===');
+          console.log('Prayer ID:', prayer.id);
+          console.log('Prayer Title:', prayer.title);
+          console.log('Current User ID (from Supabase):', user.id);
+          console.log('Prayer Author ID:', prayer.author_id);
+          console.log('Is My Prayer:', user.id === prayer.author_id);
+          console.log('========================');
+
+          // 내 기도 카드인지 확인
+          setIsMyPrayer(user.id === prayer.author_id);
+
+          // 현재 사용자가 이미 리액션했는지 확인
+          if (prayer.reactions) {
+            const userReaction = prayer.reactions.find(
+              (r) => r.user_id === user.id
+            );
+            setHasReacted(!!userReaction);
+          }
+        } else {
+          console.error('사용자 정보를 가져올 수 없습니다:', error);
+          setCurrentUserId(null);
+          setIsMyPrayer(false);
+        }
+      } catch (error) {
+        console.error('Auth 확인 중 오류:', error);
+        setCurrentUserId(null);
+        setIsMyPrayer(false);
+      }
+    };
+
+    getCurrentUser();
+  }, [prayer.reactions, prayer.author_id, prayer.id, prayer.title]);
 
   // 온라인/오프라인 상태 모니터링
   useEffect(() => {
