@@ -3,6 +3,7 @@ import { joinGroup } from '@/apis/members';
 import { createGroup, joinGroupByInviteCode } from '@/apis/groups';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { LoadingSpinner } from '@/app/components/LoadingSpinner';
 
 export default function JoinPage() {
   const [activeTab, setActiveTab] = useState<'join' | 'create'>('join');
@@ -162,8 +163,9 @@ export default function JoinPage() {
             <button
               onClick={handleJoinButtonClick}
               disabled={isLoading || !groupId.trim()}
-              className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
+              {isLoading && <LoadingSpinner />}
               {isLoading ? '참여 중...' : '기도모임 참여하기'}
             </button>
           </div>
@@ -199,8 +201,9 @@ export default function JoinPage() {
             <button
               onClick={handleCreateButtonClick}
               disabled={isLoading || !groupName.trim()}
-              className="w-full py-3 px-4 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-3 px-4 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
+              {isLoading && <LoadingSpinner />}
               {isLoading ? '생성 중...' : '기도모임 생성하기'}
             </button>
           </div>

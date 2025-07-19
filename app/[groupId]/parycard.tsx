@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { addReaction, removeReaction } from '@/apis/reactions';
 import { PrayerWithReactions } from '@/types/prayer';
 import { queueOfflineAction, isOnline } from '@/lib/offlineStorage';
+import { LoadingSpinner } from '@/app/components/LoadingSpinner';
 
 interface Props {
   prayer: PrayerWithReactions & { is_offline?: boolean };
@@ -169,16 +170,21 @@ export default function Praycard(props: Props) {
               : 'bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600'
           }`}
         >
-          <LiaPrayingHandsSolid
-            size={16}
-            className={isReacting ? 'animate-pulse' : ''}
-          />
-          <span>
-            {isReacting
-              ? '처리중...'
-              : hasReacted
-              ? '기도했습니다'
-              : '기도하기'}
+          {isReacting ? (
+            <>
+              <LoadingSpinner className="w-4 h-4" />
+              <span>처리 중...</span>
+            </>
+          ) : (
+            <>
+              <span className="text-lg">🙏</span>
+              <span>{hasReacted ? '기도했습니다' : '기도하기'}</span>
+            </>
+          )}
+          <span
+            className={`ml-1 ${hasReacted ? 'text-blue-600' : 'text-gray-500'}`}
+          >
+            {reactionCount}
           </span>
         </button>
 

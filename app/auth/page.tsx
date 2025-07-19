@@ -5,6 +5,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { LoadingSpinner } from '@/app/components/LoadingSpinner';
 
 interface AuthUser {
   id: string;
@@ -236,14 +237,23 @@ export default function AuthPage() {
                 disabled={isProcessing}
                 className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-md shadow-sm bg-yellow-400 text-gray-900 font-medium hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Image
-                  src="/kakao_login.png"
-                  alt="카카오 로그인"
-                  width={20}
-                  height={20}
-                  className="mr-3"
-                />
-                카카오로 시작하기
+                {isProcessing ? (
+                  <>
+                    <LoadingSpinner className="w-5 h-5 mr-3" />
+                    <span>로그인 중...</span>
+                  </>
+                ) : (
+                  <>
+                    <Image
+                      src="/kakao_login.png"
+                      alt="카카오 로그인"
+                      width={20}
+                      height={20}
+                      className="mr-3"
+                    />
+                    <span>카카오로 시작하기</span>
+                  </>
+                )}
               </button>
               <p className="text-xs text-gray-500 text-center">
                 로그인하여 기도 모임에 참여하세요
