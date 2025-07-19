@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Navbar from './navbar';
 import Praycard from './parycard';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaShare } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRealtimePrayers } from '@/hooks/useRealtimePrayers';
 import { useRealtimeReactions } from '@/hooks/useRealtimeReactions';
@@ -17,6 +17,7 @@ interface Props {
 export default function GroupHome({ params }: Props) {
   const [groupId, setGroupId] = useState<string>('');
   const [groupName, setGroupName] = useState<string>('로딩 중...');
+  const [showCopySuccess, setShowCopySuccess] = useState(false);
 
   // params 해결
   useEffect(() => {
@@ -28,6 +29,28 @@ export default function GroupHome({ params }: Props) {
   // 실시간 구독 훅 사용
   const { prayers, isLoading, error } = useRealtimePrayers(groupId);
   useRealtimeReactions(groupId);
+
+  // 초대 기능
+  const handleInvite = async () => {
+    const inviteUrl = `${window.location.origin}/join/${groupId}`;
+
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setShowCopySuccess(true);
+      setTimeout(() => setShowCopySuccess(false), 2000);
+    } catch (error) {
+      console.error('클립보드 복사 실패:', error);
+      // 폴백: 텍스트 선택
+      const textArea = document.createElement('textarea');
+      textArea.value = inviteUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setShowCopySuccess(true);
+      setTimeout(() => setShowCopySuccess(false), 2000);
+    }
+  };
 
   // 그룹 정보 가져오기
   useEffect(() => {
@@ -103,12 +126,12 @@ export default function GroupHome({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-24 md:pb-8">
       {/* Navigation */}
-      <Navbar groupTitle={groupName} groupId={groupId} />
+      <Navbar groupTitle={groupName} />
 
       {/* Main Content */}
-      <main className="pt-24 px-4">
+      <main className="pt-24 px-4 pb-20 md:pb-0">
         <div className="max-w-2xl mx-auto">
           {isLoading ? (
             <div className="space-y-6">
@@ -179,17 +202,87 @@ export default function GroupHome({ params }: Props) {
         </div>
       </main>
 
-      {/* Floating Action Button */}
-      <Link
-        href={`/${groupId}/add`}
-        className="floating-action group"
-        title="새 기도제목 등록"
-      >
-        <FaPlus
-          size={20}
-          className="text-white group-hover:rotate-90 transition-transform duration-300"
-        />
-      </Link>
+      {/* Desktop Floating Action Buttons */}
+      <div className="hidden md:flex fixed bottom-8 right-8 flex-col space-y-4 z-50">
+        {/* Invite Button */}
+        <div className="relative group">
+          <button
+            onClick={handleInvite}
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+            title="초대 링크 복사"
+          >
+            <FaShare
+              size={18}
+              className="text-white group-hover:rotate-12 transition-transform duration-300"
+            />
+          </button>
+
+          {/* Button Label */}
+          <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-1 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+            초대하기
+          </div>
+
+          {/* Copy Success Toast */}
+          {showCopySuccess && (
+            <div className="absolute bottom-full mb-2 right-0 bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap slide-up shadow-lg">
+              초대 링크 복사됨! 📋
+            </div>
+          )}
+        </div>
+
+        {/* Add Prayer Button */}
+        <div className="relative group">
+          <Link
+            href={`/${groupId}/add`}
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+            title="새 기도제목 등록"
+          >
+            <FaPlus
+              size={20}
+              className="text-white group-hover:rotate-90 transition-transform duration-300"
+            />
+          </Link>
+
+          {/* Button Label */}
+          <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-1 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+            기도제목 등록
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Bottom Action Buttons */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+        <div className="flex space-x-3">
+          {/* Invite Button */}
+          <div className="relative flex-1">
+            <button
+              onClick={handleInvite}
+              className="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold flex items-center justify-center space-x-2 hover:from-green-600 hover:to-emerald-700 transition-all duration-200"
+            >
+              <FaShare size={16} />
+              <span>초대하기</span>
+            </button>
+
+            {/* Copy Success Toast for Mobile */}
+            {showCopySuccess && (
+              <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap slide-up shadow-lg">
+                초대 링크 복사됨! 📋
+              </div>
+            )}
+          </div>
+
+          {/* Add Prayer Button */}
+          <div className="flex-1">
+            <Link
+              href={`/${groupId}/add`}
+              className="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold flex items-center justify-center space-x-2 hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
+            >
+              <FaPlus size={16} />
+              <span>기도제목 등록</span>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
