@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>오프라인 - Praygram</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f9fafb;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 400px;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1.5rem;
+        background-color: #e5e7eb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+      }
+
+      h1 {
+        color: #374151;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      p {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+      }
+
+      .retry-btn {
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .retry-btn:hover {
+        background-color: #1d4ed8;
+      }
+
+      .offline-content {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .offline-content h2 {
+        color: #374151;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .feature-list {
+        list-style: none;
+        padding: 0;
+        text-align: left;
+      }
+
+      .feature-list li {
+        color: #6b7280;
+        margin-bottom: 0.5rem;
+        padding-left: 1.5rem;
+        position: relative;
+      }
+
+      .feature-list li::before {
+        content: '•';
+        color: #2563eb;
+        position: absolute;
+        left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="icon">📱</div>
+      <h1>오프라인 상태</h1>
+      <p>인터넷 연결을 확인해주세요. 연결이 복구되면 자동으로 동기화됩니다.</p>
+
+      <button class="retry-btn" onclick="window.location.reload()">
+        다시 시도
+      </button>
+
+      <div class="offline-content">
+        <h2>오프라인에서도 가능한 기능</h2>
+        <ul class="feature-list">
+          <li>최근 기도제목 조회</li>
+          <li>기도제목 임시 저장</li>
+          <li>앱 기본 기능 사용</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // 온라인 상태가 복구되면 자동으로 메인 페이지로 이동
+      window.addEventListener('online', () => {
+        window.location.href = '/';
+      });
+
+      // 주기적으로 연결 상태 확인
+      setInterval(() => {
+        if (navigator.onLine) {
+          window.location.href = '/';
+        }
+      }, 5000);
+    </script>
+  </body>
+</html>

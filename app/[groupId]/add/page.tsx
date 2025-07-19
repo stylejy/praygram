@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPrayer } from '@/apis/prayers';
 import { mutate } from 'swr';
+import { saveOfflinePrayer, isOnline } from '@/lib/offlineStorage';
 
 interface Props {
   params: Promise<{ groupId: string }>;
@@ -15,6 +16,7 @@ export default function AddPrayer({ params }: Props) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   // params 해결
   useEffect(() => {
@@ -22,6 +24,22 @@ export default function AddPrayer({ params }: Props) {
       setGroupId(groupId);
     });
   }, [params]);
+
+  // 온라인/오프라인 상태 모니터링
+  useEffect(() => {
+    const updateOnlineStatus = () => {
+      setIsOfflineMode(!isOnline());
+    };
+
+    updateOnlineStatus();
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus);
+      window.removeEventListener('offline', updateOnlineStatus);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,21 +56,50 @@ export default function AddPrayer({ params }: Props) {
 
     setIsSubmitting(true);
 
-    try {
-      await createPrayer({
-        group_id: groupId,
-        title: title.trim(),
-        content: content.trim(),
-      });
+    const prayerData = {
+      group_id: groupId,
+      title: title.trim(),
+      content: content.trim(),
+    };
 
-      // SWR 캐시 업데이트 (실시간 구독이 처리하겠지만 즉시 반영을 위해)
-      mutate(`/api/prayers?groupId=${groupId}`);
+    try {
+      if (isOfflineMode) {
+        // 오프라인 모드: localStorage에 저장
+        saveOfflinePrayer(prayerData);
+
+        // SWR 캐시 업데이트 (오프라인 데이터 포함)
+        mutate(`/api/prayers?groupId=${groupId}`);
+
+        alert(
+          '오프라인 상태입니다. 기도제목이 임시 저장되었으며, 온라인 복구 시 자동으로 동기화됩니다.'
+        );
+      } else {
+        // 온라인 모드: API 호출
+        await createPrayer(prayerData);
+
+        // SWR 캐시 업데이트
+        mutate(`/api/prayers?groupId=${groupId}`);
+      }
 
       // 성공 시 그룹 홈으로 이동
       router.push(`/${groupId}`);
     } catch (error) {
       console.error('기도제목 등록 실패:', error);
-      alert('기도제목 등록에 실패했습니다. 다시 시도해주세요.');
+
+      if (isOfflineMode) {
+        alert('오프라인 저장에 실패했습니다. 다시 시도해주세요.');
+      } else {
+        // 온라인이지만 API 실패 시 오프라인으로 저장
+        try {
+          saveOfflinePrayer(prayerData);
+          alert(
+            '서버 연결에 실패했습니다. 기도제목이 임시 저장되었으며, 나중에 자동으로 동기화됩니다.'
+          );
+          router.push(`/${groupId}`);
+        } catch (offlineError) {
+          alert('기도제목 등록에 실패했습니다. 다시 시도해주세요.');
+        }
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -70,7 +117,14 @@ export default function AddPrayer({ params }: Props) {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold text-gray-800">기도제목 등록</h1>
+          <h1 className="text-xl font-bold text-gray-800">
+            기도제목 등록
+            {isOfflineMode && (
+              <span className="ml-2 text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                오프라인
+              </span>
+            )}
+          </h1>
           <button
             onClick={() => router.back()}
             className="text-gray-500 hover:text-gray-700"
@@ -78,6 +132,15 @@ export default function AddPrayer({ params }: Props) {
             ✕
           </button>
         </div>
+
+        {isOfflineMode && (
+          <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-md">
+            <p className="text-sm text-orange-800">
+              현재 오프라인 상태입니다. 기도제목이 임시 저장되며, 온라인 복구 시
+              자동으로 동기화됩니다.
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -134,7 +197,11 @@ export default function AddPrayer({ params }: Props) {
               className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isSubmitting || !title.trim() || !content.trim()}
             >
-              {isSubmitting ? '등록 중...' : '등록하기'}
+              {isSubmitting
+                ? '처리 중...'
+                : isOfflineMode
+                ? '임시 저장'
+                : '등록하기'}
             </button>
           </div>
         </form>
