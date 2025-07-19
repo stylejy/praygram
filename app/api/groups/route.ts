@@ -1,114 +1,156 @@
-import { NextRequest } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
-import { createErrorResponse, ApiError } from '@/lib/errors';
-import { v4 as uuidv4 } from 'uuid';
 
-interface CreateGroupRequest {
-  name: string;
-}
-
-interface GroupResponse {
-  id: string;
-  name: string;
-  inviteCode: string;
-  createdAt: string;
-}
-
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const user = await requireAuth(request);
-    const { name }: CreateGroupRequest = await request.json();
+    const supabase = await createSupabaseServerClient();
 
-    if (!name?.trim()) {
-      throw new ApiError(400, 'Group name is required');
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const supabase = await createSupabaseServerClient();
-    const inviteCode = uuidv4();
+    const { name, description } = await req.json();
 
-    // 트랜잭션으로 그룹 생성 및 리더 등록
+    if (!name || name.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Group name is required' },
+        { status: 400 }
+      );
+    }
+
+    // 프로필이 없는 경우 자동 생성
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      // 프로필이 없으면 생성
+      const { error: createProfileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          nickname: user.user_metadata?.nickname || user.email || 'User',
+          avatar_url: user.user_metadata?.avatar_url,
+        });
+
+      if (createProfileError) {
+        console.error('Profile creation error:', createProfileError);
+        return NextResponse.json(
+          {
+            error: 'Failed to create user profile',
+            details: createProfileError,
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    // 그룹 생성
     const { data: group, error: groupError } = await supabase
       .from('groups')
-      .insert([
-        {
-          name: name.trim(),
-          invite_code: inviteCode,
-        },
-      ])
+      .insert({
+        name: name.trim(),
+        description: description?.trim() || null,
+        created_by: user.id,
+      })
       .select()
       .single();
 
     if (groupError) {
       console.error('Group creation error:', groupError);
-      throw new ApiError(500, 'Failed to create group');
+      return NextResponse.json(
+        {
+          error: 'Failed to create group',
+          details: groupError,
+        },
+        { status: 500 }
+      );
     }
 
-    // 생성자를 리더로 group_members에 추가
-    const { error: memberError } = await supabase.from('group_members').insert([
-      {
-        group_id: group.id,
-        user_id: user.id,
-        role: 'LEADER',
-      },
-    ]);
+    // 생성자를 리더로 추가
+    const { error: memberError } = await supabase.from('group_members').insert({
+      group_id: group.id,
+      user_id: user.id,
+      role: 'LEADER',
+    });
 
     if (memberError) {
-      console.error('Member assignment error:', memberError);
-      // 그룹 생성 롤백을 위해 삭제
+      console.error('Member creation error:', memberError);
+      // 그룹은 생성되었지만 멤버 추가 실패 - 그룹 삭제
       await supabase.from('groups').delete().eq('id', group.id);
-      throw new ApiError(500, 'Failed to assign leader role');
+      return NextResponse.json(
+        {
+          error: 'Failed to add creator as leader',
+          details: memberError,
+        },
+        { status: 500 }
+      );
     }
 
-    const response: GroupResponse = {
-      id: group.id,
-      name: group.name,
-      inviteCode: group.invite_code,
-      createdAt: group.created_at,
-    };
-
-    return Response.json(response, { status: 201 });
+    return NextResponse.json({
+      message: 'Group created successfully',
+      group,
+      invite_code: group.invite_code,
+    });
   } catch (error) {
-    console.error('Group creation API error:', error);
-    return createErrorResponse(error);
+    console.error('Unexpected error:', error);
+    return NextResponse.json(
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const user = await requireAuth(request);
     const supabase = await createSupabaseServerClient();
 
-    // 사용자가 소속된 그룹들 조회
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // 사용자가 속한 그룹 목록 조회
     const { data: groups, error } = await supabase
       .from('groups')
       .select(
         `
-        id,
-        name,
-        invite_code,
-        created_at,
-        group_members!inner(role)
+        *,
+        group_members!inner (
+          user_id,
+          role
+        )
       `
       )
-      .eq('group_members.user_id', user.id);
+      .eq('group_members.user_id', user.id)
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Groups fetch error:', error);
-      throw new ApiError(500, 'Failed to fetch groups');
+      return NextResponse.json(
+        { error: 'Failed to fetch groups' },
+        { status: 500 }
+      );
     }
 
-    const response = groups.map((group: any) => ({
-      id: group.id,
-      name: group.name,
-      inviteCode: group.invite_code,
-      createdAt: group.created_at,
-      role: group.group_members[0]?.role,
-    }));
-
-    return Response.json(response);
+    return NextResponse.json({ groups });
   } catch (error) {
-    console.error('Groups fetch API error:', error);
-    return createErrorResponse(error);
+    console.error('Unexpected error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
