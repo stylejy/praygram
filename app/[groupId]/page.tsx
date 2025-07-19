@@ -32,7 +32,9 @@ export default function GroupHome({ params }: Props) {
 
   // 초대 기능
   const handleInvite = async () => {
+    console.log('초대 링크 생성 - 현재 groupId:', groupId);
     const inviteUrl = `${window.location.origin}/join/${groupId}`;
+    console.log('생성된 초대 링크:', inviteUrl);
 
     try {
       await navigator.clipboard.writeText(inviteUrl);

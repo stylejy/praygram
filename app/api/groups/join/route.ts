@@ -24,36 +24,22 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createSupabaseServerClient();
 
-    // 그룹 존재 확인 - ID 또는 invite_code로 조회
+    // 그룹 존재 확인 (ID로만 조회)
     console.log('그룹 조회 시도 - groupId:', groupId.trim());
 
-    // 먼저 ID로 조회 시도
-    let { data: group, error: groupError } = await supabase
+    const { data: group, error: groupError } = await supabase
       .from('groups')
-      .select('id, name, invite_code')
+      .select('id, name')
       .eq('id', groupId.trim())
       .single();
 
     if (groupError || !group) {
-      console.log('ID로 그룹 조회 실패, invite_code로 재시도:', groupError);
-
-      // ID로 찾지 못하면 invite_code로 조회 시도
-      const { data: groupByInvite, error: inviteError } = await supabase
-        .from('groups')
-        .select('id, name, invite_code')
-        .eq('invite_code', groupId.trim())
-        .single();
-
-      if (inviteError || !groupByInvite) {
-        console.error('invite_code로도 그룹 조회 실패:', inviteError);
-        throw new ApiError(404, 'Group not found');
-      }
-
-      group = groupByInvite;
-      console.log('invite_code로 그룹 조회 성공:', group);
-    } else {
-      console.log('ID로 그룹 조회 성공:', group);
+      console.error('그룹 조회 실패:', groupError);
+      console.error('조회 시도한 ID:', groupId.trim());
+      throw new ApiError(404, 'Group not found');
     }
+
+    console.log('그룹 조회 성공:', group);
 
     // 이미 해당 그룹의 멤버인지 확인
     const { data: existingMember } = await supabase

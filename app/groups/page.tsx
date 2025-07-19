@@ -10,7 +10,6 @@ interface Group {
   id: string;
   name: string;
   description?: string;
-  invite_code: string;
   created_at: string;
   group_members: Array<{
     user_id: string;

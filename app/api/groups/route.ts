@@ -96,7 +96,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       message: 'Group created successfully',
       group,
-      invite_code: group.invite_code,
     });
   } catch (error) {
     console.error('Unexpected error:', error);

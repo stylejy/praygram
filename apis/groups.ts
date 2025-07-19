@@ -8,12 +8,7 @@ interface CreateGroupRequest {
 interface CreateGroupResponse {
   id: string;
   name: string;
-  inviteCode: string;
   createdAt: string;
-}
-
-interface JoinGroupByInviteRequest {
-  inviteCode: string;
 }
 
 interface JoinGroupByInviteResponse {
@@ -27,7 +22,6 @@ interface GetUserGroupsResponse {
     id: string;
     name: string;
     description?: string;
-    invite_code: string;
     created_at: string;
     group_members: Array<{
       user_id: string;
@@ -66,7 +60,6 @@ export const createGroup = async (
   return {
     id: data.group.id,
     name: data.group.name,
-    inviteCode: data.group.invite_code,
     createdAt: data.group.created_at,
   };
 };
