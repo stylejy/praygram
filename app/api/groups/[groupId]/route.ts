@@ -26,7 +26,6 @@ export async function GET(req: NextRequest, { params }: Props) {
         id,
         name,
         description,
-        invite_code,
         created_at,
         created_by,
         group_members!inner (
