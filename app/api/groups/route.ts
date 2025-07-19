@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       throw new ApiError(400, 'Group name is required');
     }
 
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const inviteCode = uuidv4();
 
     // 트랜잭션으로 그룹 생성 및 리더 등록
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (groupError) {
+      console.error('Group creation error:', groupError);
       throw new ApiError(500, 'Failed to create group');
     }
 
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
     ]);
 
     if (memberError) {
+      console.error('Member assignment error:', memberError);
       // 그룹 생성 롤백을 위해 삭제
       await supabase.from('groups').delete().eq('id', group.id);
       throw new ApiError(500, 'Failed to assign leader role');
@@ -67,6 +69,7 @@ export async function POST(request: NextRequest) {
 
     return Response.json(response, { status: 201 });
   } catch (error) {
+    console.error('Group creation API error:', error);
     return createErrorResponse(error);
   }
 }
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // 사용자가 소속된 그룹들 조회
     const { data: groups, error } = await supabase
@@ -91,6 +94,7 @@ export async function GET(request: NextRequest) {
       .eq('group_members.user_id', user.id);
 
     if (error) {
+      console.error('Groups fetch error:', error);
       throw new ApiError(500, 'Failed to fetch groups');
     }
 
@@ -104,6 +108,7 @@ export async function GET(request: NextRequest) {
 
     return Response.json(response);
   } catch (error) {
+    console.error('Groups fetch API error:', error);
     return createErrorResponse(error);
   }
 }

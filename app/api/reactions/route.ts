@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       throw new ApiError(400, 'Invalid reaction type');
     }
 
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // 기도제목 조회 및 그룹 멤버십 확인
     const { data: prayer, error: prayerError } = await supabase
@@ -64,11 +64,13 @@ export async function POST(request: NextRequest) {
       if (error.code === '23505') {
         throw new ApiError(409, 'You have already reacted to this prayer');
       }
+      console.error('Reaction creation error:', error);
       throw new ApiError(500, 'Failed to add reaction');
     }
 
     return Response.json(reaction, { status: 201 });
   } catch (error) {
+    console.error('Reaction creation API error:', error);
     return createErrorResponse(error);
   }
 }
@@ -80,15 +82,11 @@ export async function DELETE(request: NextRequest) {
     const prayer_id = searchParams.get('prayer_id');
     const type = searchParams.get('type') || 'pray';
 
-    // 입력 검증
     if (!prayer_id) {
       throw new ApiError(400, 'Prayer ID is required');
     }
-    if (type !== 'pray' && type !== 'amen') {
-      throw new ApiError(400, 'Invalid reaction type');
-    }
 
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // 기도제목 조회 및 그룹 멤버십 확인
     const { data: prayer, error: prayerError } = await supabase
@@ -113,7 +111,7 @@ export async function DELETE(request: NextRequest) {
       throw new ApiError(403, 'You are not a member of this group');
     }
 
-    // 리액션 삭제 (본인의 리액션만 삭제 가능)
+    // 리액션 삭제
     const { error } = await supabase
       .from('reactions')
       .delete()
@@ -122,11 +120,13 @@ export async function DELETE(request: NextRequest) {
       .eq('type', type);
 
     if (error) {
+      console.error('Reaction deletion error:', error);
       throw new ApiError(500, 'Failed to remove reaction');
     }
 
     return Response.json({ message: 'Reaction removed successfully' });
   } catch (error) {
+    console.error('Reaction deletion API error:', error);
     return createErrorResponse(error);
   }
 }

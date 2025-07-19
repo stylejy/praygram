@@ -2,19 +2,25 @@ import { NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { createErrorResponse, ApiError } from '@/lib/errors';
-import { Prayer, CreatePrayerRequest } from '@/types/prayer';
+
+interface CreatePrayerRequest {
+  title: string;
+  content: string;
+  group_id: string;
+  is_private?: boolean;
+}
 
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const { searchParams } = new URL(request.url);
-    const groupId = searchParams.get('group_id');
+    const groupId = searchParams.get('groupId');
 
     if (!groupId) {
       throw new ApiError(400, 'Group ID is required');
     }
 
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // 그룹 멤버십 확인
     const { data: membership, error: membershipError } = await supabase
@@ -28,7 +34,7 @@ export async function GET(request: NextRequest) {
       throw new ApiError(403, 'You are not a member of this group');
     }
 
-    // 기도제목 조회 (그룹 멤버만 조회 가능)
+    // 기도제목 조회 (최신순)
     const { data: prayers, error } = await supabase
       .from('prayers')
       .select(
@@ -38,9 +44,7 @@ export async function GET(request: NextRequest) {
         reactions(
           id,
           type,
-          user_id,
-          created_at,
-          user:profiles(nickname)
+          user_id
         )
       `
       )
@@ -48,18 +52,19 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
+      console.error('Prayers fetch error:', error);
       throw new ApiError(500, 'Failed to fetch prayers');
     }
 
-    // 리액션 카운트 계산
-    const prayersWithReactions =
-      prayers?.map((prayer: any) => ({
-        ...prayer,
-        reaction_count: prayer.reactions?.length || 0,
-      })) || [];
+    // 리액션 카운트 추가
+    const prayersWithReactionCount = prayers.map((prayer) => ({
+      ...prayer,
+      reaction_count: prayer.reactions?.length || 0,
+    }));
 
-    return Response.json(prayersWithReactions);
+    return Response.json(prayersWithReactionCount);
   } catch (error) {
+    console.error('Prayers fetch API error:', error);
     return createErrorResponse(error);
   }
 }
@@ -86,7 +91,7 @@ export async function POST(request: NextRequest) {
       throw new ApiError(400, 'Content must be 500 characters or less');
     }
 
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // 그룹 멤버십 확인
     const { data: membership, error: membershipError } = await supabase
@@ -121,11 +126,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
+      console.error('Prayer creation error:', error);
       throw new ApiError(500, 'Failed to create prayer');
     }
 
     return Response.json(prayer, { status: 201 });
   } catch (error) {
+    console.error('Prayer creation API error:', error);
     return createErrorResponse(error);
   }
 }

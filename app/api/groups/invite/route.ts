@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       throw new ApiError(400, 'Invite code is required');
     }
 
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // 초대 코드로 그룹 찾기
     const { data: group, error: groupError } = await supabase
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (groupError || !group) {
+      console.error('Group lookup error:', groupError);
       throw new ApiError(404, 'Invalid invite code');
     }
 
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest) {
     ]);
 
     if (memberError) {
+      console.error('Member insertion error:', memberError);
       throw new ApiError(500, 'Failed to join group');
     }
 
@@ -72,6 +74,7 @@ export async function POST(request: NextRequest) {
 
     return Response.json(response, { status: 201 });
   } catch (error) {
+    console.error('Group join API error:', error);
     return createErrorResponse(error);
   }
 }

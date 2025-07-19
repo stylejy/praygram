@@ -1,4 +1,4 @@
-import { createSupabaseBrowserClient } from './supabase';
+import { createSupabaseServerClient } from './supabase-server';
 import { ApiError } from './errors';
 
 export interface AuthUser {
@@ -6,22 +6,18 @@ export interface AuthUser {
   email: string;
 }
 
-export async function verifyToken(authHeader?: string): Promise<AuthUser> {
-  if (!authHeader?.startsWith('Bearer ')) {
-    throw new ApiError(401, 'Authorization header missing or invalid');
-  }
-
-  const token = authHeader.split(' ')[1];
-  const supabase = createSupabaseBrowserClient();
-
+export async function requireAuth(request: Request): Promise<AuthUser> {
   try {
+    const supabase = await createSupabaseServerClient();
+
+    // 쿠키에서 사용자 정보 확인
     const {
       data: { user },
-      error,
-    } = await supabase.auth.getUser(token);
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (error || !user) {
-      throw new ApiError(401, 'Invalid or expired token');
+    if (authError || !user) {
+      throw new ApiError(401, 'Authentication required');
     }
 
     return {
@@ -32,11 +28,6 @@ export async function verifyToken(authHeader?: string): Promise<AuthUser> {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError(401, 'Token verification failed');
+    throw new ApiError(401, 'Authentication failed');
   }
-}
-
-export async function requireAuth(request: Request): Promise<AuthUser> {
-  const authHeader = request.headers.get('Authorization');
-  return verifyToken(authHeader ?? undefined);
 }
