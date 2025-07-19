@@ -90,7 +90,7 @@ export default function GroupHome({ params }: Props) {
 
   if (!groupId) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="glass-card p-8 rounded-3xl text-center slide-up">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
             <div className="loading-spinner"></div>
@@ -103,7 +103,7 @@ export default function GroupHome({ params }: Props) {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="glass-card p-8 rounded-3xl text-center slide-up max-w-md">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
             <span className="text-2xl">⚠️</span>
@@ -126,7 +126,7 @@ export default function GroupHome({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen pb-24 md:pb-8">
+    <div className="min-h-screen pb-24 md:pb-8 bg-white">
       {/* Navigation */}
       <Navbar groupTitle={groupName} />
 
