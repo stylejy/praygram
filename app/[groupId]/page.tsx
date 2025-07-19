@@ -30,14 +30,7 @@ export default async function GroupHome({ params }: Props) {
       </header>
       <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 w-full h-full py-28 align-top">
         {prayers?.map((prayer) => (
-          <Praycard
-            key={prayer.id}
-            prayer={prayer.title}
-            content={prayer.content}
-            time={prayer.created_at}
-            user={prayer.author?.nickname || '알 수 없음'}
-            prayCount={prayer.reaction_count || 0}
-          />
+          <Praycard key={prayer.id} prayer={prayer} />
         ))}
       </main>
       <Link href={`/${groupId}/add`}>
