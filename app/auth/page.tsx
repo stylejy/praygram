@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase';
-import Image from 'next/image';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
 import { PraygramLogo } from '@/app/components/PraygramLogo';
 
@@ -244,13 +243,19 @@ export default function AuthPage() {
                   </>
                 ) : (
                   <>
-                    <Image
-                      src="/kakao_login.png"
-                      alt="카카오 로그인"
-                      width={24}
-                      height={24}
+                    {/* Kakao Talk Symbol */}
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
                       className="mr-3"
-                    />
+                    >
+                      <path
+                        d="M12 3C7.03 3 3 6.58 3 10.95c0 2.84 1.88 5.34 4.68 6.84l-.9 3.3c-.08.3.22.53.49.38L10.9 19c.36.03.73.05 1.1.05 4.97 0 9-3.58 9-7.95S16.97 3 12 3z"
+                        fill="currentColor"
+                      />
+                    </svg>
                     <span>카카오로 시작하기</span>
                   </>
                 )}
