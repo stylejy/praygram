@@ -94,6 +94,59 @@ export const joinGroupByInviteCode = async (
   return response.json();
 };
 
+// 그룹 ID로 직접 참여하는 함수
+export const joinGroupById = async (
+  groupId: string
+): Promise<JoinGroupByInviteResponse> => {
+  const supabase = createSupabaseBrowserClient();
+  const { data: session } = await supabase.auth.getSession();
+
+  if (!session?.session?.access_token) {
+    throw new Error('Authentication required');
+  }
+
+  const response = await fetch('/api/groups/join', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.session.access_token}`,
+    },
+    body: JSON.stringify({ groupId }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Failed to join group');
+  }
+
+  return response.json();
+};
+
+// 스마트 그룹 참여 함수 - 그룹 ID 또는 초대 코드 자동 감지
+export const joinGroupSmart = async (
+  input: string
+): Promise<JoinGroupByInviteResponse> => {
+  const trimmedInput = input.trim();
+
+  // UUID 형태 확인 (36자리 하이픈 포함)
+  const uuidPattern =
+    /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+
+  if (uuidPattern.test(trimmedInput)) {
+    // UUID 형태인 경우, 먼저 그룹 ID로 시도
+    try {
+      return await joinGroupById(trimmedInput);
+    } catch (error) {
+      // 그룹 ID로 실패하면 초대 코드로 시도
+      console.log('그룹 ID로 참여 실패, 초대 코드로 재시도:', error);
+      return await joinGroupByInviteCode(trimmedInput);
+    }
+  } else {
+    // UUID 형태가 아닌 경우 초대 코드로 처리
+    return await joinGroupByInviteCode(trimmedInput);
+  }
+};
+
 export const getUserGroups = async () => {
   const supabase = createSupabaseBrowserClient();
   const { data: session } = await supabase.auth.getSession();

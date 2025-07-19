@@ -1,6 +1,10 @@
 'use client';
 import { joinGroup } from '@/apis/members';
-import { createGroup, joinGroupByInviteCode } from '@/apis/groups';
+import {
+  createGroup,
+  joinGroupByInviteCode,
+  joinGroupSmart,
+} from '@/apis/groups';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
@@ -24,8 +28,8 @@ export default function JoinPage() {
     setErrorMessage('');
 
     try {
-      // 초대 코드로 그룹 참여
-      const response = await joinGroupByInviteCode(groupId);
+      // 스마트 그룹 참여 (그룹 ID 또는 초대 코드 자동 감지)
+      const response = await joinGroupSmart(groupId);
       if (response) {
         // 로컬스토리지 업데이트
         localStorage.setItem('group', response.groupId);
@@ -39,7 +43,7 @@ export default function JoinPage() {
     } catch (error) {
       console.error('그룹 참여 실패:', error);
       setErrorMessage(
-        '기도모임 아이디가 존재하지 않거나 참여할 수 없습니다. 다시 확인해주세요.'
+        '기도모임을 찾을 수 없거나 참여할 수 없습니다. 초대 코드나 링크를 다시 확인해주세요.'
       );
     } finally {
       setIsLoading(false);
@@ -75,12 +79,47 @@ export default function JoinPage() {
   const handlePasteClick = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      setGroupId(text);
+
+      // 링크에서 그룹 ID 추출 시도
+      const extractedId = extractGroupIdFromText(text);
+      setGroupId(extractedId);
       setErrorMessage('');
     } catch (error) {
       console.error('클립보드 읽기 실패:', error);
       setErrorMessage('클립보드 읽기에 실패했습니다.');
     }
+  };
+
+  // 텍스트에서 그룹 ID 또는 초대 코드 추출
+  const extractGroupIdFromText = (text: string): string => {
+    const trimmedText = text.trim();
+
+    // 초대 링크 패턴 확인 (/join/{groupId})
+    const linkMatch = trimmedText.match(/\/join\/([a-f0-9-]{36})/i);
+    if (linkMatch) {
+      return linkMatch[1]; // 그룹 ID 반환
+    }
+
+    // URL에서 그룹 ID 추출 시도
+    try {
+      const url = new URL(trimmedText);
+      const pathMatch = url.pathname.match(/\/join\/([a-f0-9-]{36})/i);
+      if (pathMatch) {
+        return pathMatch[1];
+      }
+    } catch {
+      // URL이 아닌 경우 무시
+    }
+
+    // UUID 형태인지 확인 (초대 코드)
+    const uuidPattern =
+      /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+    if (uuidPattern.test(trimmedText)) {
+      return trimmedText;
+    }
+
+    // 그 외의 경우 원본 텍스트 반환
+    return trimmedText;
   };
 
   return (
@@ -167,18 +206,28 @@ export default function JoinPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">
-                  초대 코드 *
+                  초대 코드 또는 링크 *
                 </label>
-                <input
-                  type="text"
-                  value={groupId}
-                  onChange={(e) => setGroupId(e.target.value)}
-                  placeholder="초대 코드를 입력하세요"
-                  className="glass-input w-full px-4 py-3 rounded-xl text-gray-900 font-medium placeholder-gray-500"
-                  disabled={isLoading}
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={groupId}
+                    onChange={(e) => setGroupId(e.target.value)}
+                    placeholder="초대 코드 또는 링크를 입력하세요"
+                    className="glass-input flex-1 px-4 py-3 rounded-xl text-gray-900 font-medium placeholder-gray-500"
+                    disabled={isLoading}
+                  />
+                  <button
+                    onClick={handlePasteClick}
+                    disabled={isLoading}
+                    className="glass-button px-4 py-3 rounded-xl text-sm font-medium text-gray-700 disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                    title="클립보드에서 붙여넣기"
+                  >
+                    📋
+                  </button>
+                </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  기도모임 리더에게 초대 코드를 받아 입력해주세요
+                  초대 코드 또는 공유받은 링크를 입력해주세요
                 </p>
               </div>
 
