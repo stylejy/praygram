@@ -7,6 +7,7 @@ import { FaPlus } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRealtimePrayers } from '@/hooks/useRealtimePrayers';
 import { useRealtimeReactions } from '@/hooks/useRealtimeReactions';
+import { createSupabaseBrowserClient } from '@/lib/supabase';
 
 interface Props {
   params: Promise<{ groupId: string }>;
@@ -33,13 +34,31 @@ export default function GroupHome({ params }: Props) {
 
     const fetchGroupInfo = async () => {
       try {
-        const response = await fetch(`/api/groups/${groupId}`);
+        // Supabase 세션에서 토큰 가져오기
+        const supabase = createSupabaseBrowserClient();
+        const { data: session } = await supabase.auth.getSession();
+
+        if (!session?.session?.access_token) {
+          console.error('No access token available');
+          return;
+        }
+
+        const response = await fetch(`/api/groups/${groupId}`, {
+          headers: {
+            Authorization: `Bearer ${session.session.access_token}`,
+          },
+        });
+
         if (response.ok) {
           const group = await response.json();
           setGroupName(group.name);
+        } else {
+          console.error('Failed to fetch group:', response.status);
+          setGroupName('그룹 정보 없음');
         }
       } catch (error) {
         console.error('그룹 정보 로드 실패:', error);
+        setGroupName('로드 실패');
       }
     };
 

@@ -118,16 +118,9 @@ export default function AuthPage() {
       // localStorage에 저장
       saveMember(memberData);
 
-      // 그룹 참여 여부에 따라 리디렉션
-      addDebugLog(`리디렉션 준비 - 그룹: ${memberData.group}`);
-
-      if (!memberData.group || memberData.group === 'null') {
-        addDebugLog('그룹 참여 페이지로 이동');
-        router.push('/join');
-      } else {
-        addDebugLog(`그룹 홈으로 이동: ${memberData.group}`);
-        router.push(`/${memberData.group}`);
-      }
+      // 항상 그룹 선택 페이지로 리디렉션
+      addDebugLog('그룹 선택 페이지로 이동');
+      router.push('/groups');
     } catch (error) {
       console.error('Error processing member:', error);
       const errorMessage =

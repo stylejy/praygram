@@ -1,17 +1,38 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createSupabaseBrowserClient } from '@/lib/supabase';
 
 export default function Home() {
   const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      router.push('/auth');
-    }, 1000);
+    const checkAuth = async () => {
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-    return () => clearTimeout(timer);
+        if (session?.user) {
+          // 로그인되어 있으면 그룹 선택 페이지로
+          router.push('/groups');
+        } else {
+          // 로그인되어 있지 않으면 auth 페이지로
+          router.push('/auth');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        // 에러 시에도 auth 페이지로
+        router.push('/auth');
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   return (
@@ -34,7 +55,9 @@ export default function Home() {
             fill="currentFill"
           />
         </svg>
-        <span className="sr-only">Loading...</span>
+        <span className="sr-only">
+          {isChecking ? '인증 상태 확인 중...' : 'Loading...'}
+        </span>
       </div>
     </main>
   );
