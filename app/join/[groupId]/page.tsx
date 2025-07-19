@@ -32,6 +32,8 @@ export default function JoinGroup() {
         return;
       }
 
+      // 이미 로그인된 경우 - 바로 그룹 참여 처리
+
       // localStorage에 사용자 정보 업데이트
       localStorage.setItem('id', user.id);
       localStorage.setItem(

@@ -161,20 +161,45 @@ export default function AuthPage() {
         localStorage.setItem('id', authUser.id);
         localStorage.setItem('nickname', authUser.name);
 
-        // 리다이렉트 URL 확인 (초대 링크에서 온 경우)
-        const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
+        // 초대 링크 처리 - 로그인 완료 즉시 그룹 참여
         const pendingInviteGroupId = localStorage.getItem(
           'pendingInviteGroupId'
         );
 
+        if (pendingInviteGroupId) {
+          // 초대 링크에서 온 경우 - 즉시 그룹 참여 처리
+          addDebugLog(`초대 그룹 자동 참여 시작: ${pendingInviteGroupId}`);
+
+          try {
+            // joinGroup import 필요
+            const { joinGroup } = await import('@/apis/members');
+            await joinGroup(pendingInviteGroupId, authUser.id);
+
+            // 초대 관련 정보 정리
+            localStorage.removeItem('pendingInviteGroupId');
+            sessionStorage.removeItem('redirectAfterAuth');
+
+            addDebugLog(
+              `그룹 참여 완료, 그룹방으로 이동: ${pendingInviteGroupId}`
+            );
+            router.push(`/${pendingInviteGroupId}`);
+            return;
+          } catch (error) {
+            console.error('자동 그룹 참여 실패:', error);
+            addDebugLog(`자동 그룹 참여 실패: ${error}`);
+
+            // 실패 시 일반 초대 페이지로 이동
+            router.push(`/join/${pendingInviteGroupId}`);
+            return;
+          }
+        }
+
+        // 일반 리다이렉트 처리
+        const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
         if (redirectUrl) {
           sessionStorage.removeItem('redirectAfterAuth');
-          addDebugLog(`초대 링크로 리다이렉트: ${redirectUrl}`);
+          addDebugLog(`일반 리다이렉트: ${redirectUrl}`);
           router.push(redirectUrl);
-        } else if (pendingInviteGroupId) {
-          // 직접적인 초대 링크 접근인 경우
-          addDebugLog(`대기 중인 초대 그룹으로 이동: ${pendingInviteGroupId}`);
-          router.push(`/join/${pendingInviteGroupId}`);
         } else {
           // 기본: 그룹 선택 페이지로 리다이렉션
           addDebugLog('그룹 선택 페이지로 이동');
