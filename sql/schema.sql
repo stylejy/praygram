@@ -199,15 +199,20 @@ ALTER TABLE reactions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "profiles_policy" ON profiles
     FOR ALL USING (auth.uid() = id);
 
--- 2. Groups 정책 (group_members 참조 제거)
+-- 2. Groups 정책 (그룹 참여를 위해 인증된 사용자도 조회 허용)
 CREATE POLICY "groups_select_policy" ON groups
     FOR SELECT USING (
-        created_by = auth.uid()  -- 생성자만 조회 가능
+        -- 1. 생성자는 항상 조회 가능
+        created_by = auth.uid()
         OR
+        -- 2. 이미 멤버인 경우 조회 가능
         id IN (
             SELECT DISTINCT group_id FROM group_members 
             WHERE user_id = auth.uid()
         )
+        OR
+        -- 3. 인증된 사용자는 그룹 존재 확인을 위해 기본 정보 조회 가능 (그룹 참여를 위해 필요)
+        auth.uid() IS NOT NULL
     );
 
 CREATE POLICY "groups_insert_policy" ON groups
