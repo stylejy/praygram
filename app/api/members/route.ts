@@ -5,13 +5,13 @@ import { cookies } from 'next/headers';
 interface Member {
   id: string;
   nickname: string;
-  group_id: string | null;
+  group: string | null;
   is_manager: boolean;
   created_at: string;
   updated_at: string;
 }
 
-// 사용자 정보 조회
+// 기존 사용자 프로필 조회
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -41,56 +41,49 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // URL에서 userId 파라미터 가져오기
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('userId') || user.id;
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-
-    // 요청한 사용자 ID와 현재 로그인한 사용자가 같은지 확인
-    if (userId !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
-    // profiles 테이블에서 사용자 정보 조회
+    // 프로필 조회
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('id, nickname, created_at, updated_at')
+      .select('*')
       .eq('id', userId)
       .single();
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // 프로필이 없으면 빈 배열 반환
+        // 프로필이 없는 경우
         return NextResponse.json([]);
       }
       throw error;
     }
 
-    // group_members 테이블에서 그룹 정보 조회
-    const { data: groupMember } = await supabase
+    // 그룹 멤버십 정보 조회
+    const { data: membership } = await supabase
       .from('group_members')
-      .select('group_id, is_manager')
+      .select(
+        `
+        group_id,
+        role,
+        groups!inner(id, name)
+      `
+      )
       .eq('user_id', userId)
       .single();
 
-    const member = {
+    const member: Member = {
       id: profile.id,
       nickname: profile.nickname,
-      group: groupMember?.group_id || null,
-      is_manager: groupMember?.is_manager || false,
+      group: membership?.group_id || null,
+      is_manager: membership?.role === 'LEADER',
       created_at: profile.created_at,
       updated_at: profile.updated_at,
     };
 
     return NextResponse.json([member]);
   } catch (error) {
-    console.error('Error getting member:', error);
+    console.error('Error fetching member:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -179,6 +172,82 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(member);
   } catch (error) {
     console.error('Error creating member:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// 멤버 정보 업데이트 (그룹 정보 등)
+export async function PATCH(request: NextRequest) {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
+    // 현재 사용자 확인
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { groupId, isManager } = await request.json();
+
+    // 프로필 존재 확인
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    }
+
+    // 그룹 멤버십 정보 조회
+    const { data: membership } = await supabase
+      .from('group_members')
+      .select(
+        `
+        group_id,
+        role,
+        groups!inner(id, name)
+      `
+      )
+      .eq('user_id', user.id)
+      .single();
+
+    const member: Member = {
+      id: profile.id,
+      nickname: profile.nickname,
+      group: groupId || membership?.group_id || null,
+      is_manager:
+        isManager !== undefined ? isManager : membership?.role === 'LEADER',
+      created_at: profile.created_at,
+      updated_at: profile.updated_at,
+    };
+
+    return NextResponse.json(member);
+  } catch (error) {
+    console.error('Error updating member:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

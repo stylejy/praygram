@@ -1,6 +1,6 @@
 import { createSupabaseBrowserClient } from '@/lib/supabase';
 
-export interface Member {
+interface Member {
   id: string;
   nickname: string;
   group: string | null;
@@ -9,21 +9,24 @@ export interface Member {
   updated_at: string;
 }
 
-// 사용자의 멤버 정보 조회
+// 기존 멤버 정보 조회
 export async function getMembers(userId: string): Promise<Member[] | null> {
   try {
-    const response = await fetch(`/api/members?userId=${userId}`);
+    const response = await fetch(`/api/members?userId=${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
-      if (response.status === 404) {
-        return []; // 멤버가 없으면 빈 배열 반환
-      }
-      throw new Error(`Failed to get members: ${response.statusText}`);
+      throw new Error(`Failed to get member: ${response.statusText}`);
     }
 
-    return await response.json();
+    const members = await response.json();
+    return members;
   } catch (error) {
-    console.error('Error getting members:', error);
+    console.error('Error getting member:', error);
     return null;
   }
 }
@@ -51,6 +54,35 @@ export async function createMembers(
     return [member]; // 배열로 감싸서 반환 (기존 코드 호환성)
   } catch (error) {
     console.error('Error creating member:', error);
+    return null;
+  }
+}
+
+// 멤버 정보 업데이트
+export async function updateMember(
+  groupId?: string,
+  isManager?: boolean
+): Promise<Member | null> {
+  try {
+    const response = await fetch('/api/members', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        groupId,
+        isManager,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update member: ${response.statusText}`);
+    }
+
+    const member = await response.json();
+    return member;
+  } catch (error) {
+    console.error('Error updating member:', error);
     return null;
   }
 }
