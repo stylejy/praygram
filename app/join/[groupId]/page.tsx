@@ -51,9 +51,9 @@ export default function JoinGroup() {
           sessionStorage.removeItem('redirectAfterAuth');
 
           setStatus('redirecting');
-          setTimeout(() => {
-            router.push(`/${groupId}`);
-          }, 1500);
+
+          // 이미 그룹에 속해있는 경우 즉시 이동
+          router.push(`/${groupId}`);
         }
       } catch (error) {
         console.error('그룹 참여 실패:', error);
@@ -155,7 +155,12 @@ export default function JoinGroup() {
           {status === 'error' && (
             <div className="space-y-3">
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  const groupId = pathname.split('/')[2];
+                  setStatus('checking');
+                  setErrorMessage('');
+                  processJoin(groupId);
+                }}
                 className="primary-button w-full py-3 px-4 rounded-xl font-semibold text-white hover:scale-105 transition-all duration-200"
               >
                 다시 시도

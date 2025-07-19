@@ -126,11 +126,17 @@ export const joinGroup = async (groupId: string, memberId: string) => {
             throw new Error('사용자 등록에 실패했습니다. 다시 시도해주세요.');
           }
 
-          return [newMember];
+          return newMember;
         }
       }
 
       throw new Error('사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+    }
+
+    // 이미 그룹에 속해있는지 확인
+    if (existingMember.group === groupId) {
+      console.log('이미 그룹에 속해있습니다:', groupId);
+      return existingMember;
     }
 
     // 그룹 정보 업데이트
@@ -138,7 +144,8 @@ export const joinGroup = async (groupId: string, memberId: string) => {
       .from('members')
       .update({ group: groupId })
       .eq('id', memberId)
-      .select();
+      .select()
+      .single();
 
     if (error) {
       console.error('그룹 참여 실패:', error);
