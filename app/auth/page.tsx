@@ -95,20 +95,50 @@ export default function AuthPage() {
       setError(null);
       addDebugLog('카카오 로그인 시작');
 
+      // 모바일 환경 감지
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+      addDebugLog(`모바일 환경: ${isMobile}`);
+
       const { error } = await supabaseBrowserClient.auth.signInWithOAuth({
         provider: 'kakao',
         options: {
           redirectTo: `${window.location.origin}/auth`,
+          // 모바일에서는 popup 대신 redirect 사용
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+          skipBrowserRedirect: false,
         },
       });
 
       if (error) {
         throw error;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Kakao login error:', error);
-      addDebugLog(`카카오 로그인 실패: ${error}`);
-      setError('카카오 로그인에 실패했습니다. 다시 시도해주세요.');
+      addDebugLog(`카카오 로그인 실패: ${error.message || error}`);
+
+      // 더 구체적인 에러 메시지
+      let errorMessage = '카카오 로그인에 실패했습니다.';
+
+      if (error.message?.includes('popup')) {
+        errorMessage =
+          '팝업이 차단되었습니다. 브라우저 설정에서 팝업을 허용해주세요.';
+      } else if (error.message?.includes('network')) {
+        errorMessage = '네트워크 연결을 확인해주세요.';
+      } else if (error.message?.includes('redirect')) {
+        errorMessage =
+          '리다이렉트 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+      } else if (error.message?.includes('cookies')) {
+        errorMessage =
+          '쿠키 설정을 확인해주세요. 브라우저에서 쿠키를 허용해야 합니다.';
+      }
+
+      setError(errorMessage + ' 다시 시도해주세요.');
     }
   };
 
@@ -194,13 +224,30 @@ export default function AuthPage() {
                   <span className="text-red-600 text-sm">⚠️</span>
                 </div>
                 <div className="flex-1">
-                  <p className="text-red-800 font-medium">{error}</p>
+                  <p className="text-red-800 font-medium mb-2">{error}</p>
+
+                  {/* 모바일 크롬 사용자를 위한 추가 안내 */}
+                  <div className="text-sm text-red-700 space-y-1">
+                    <p className="font-medium">모바일에서 문제가 발생한다면:</p>
+                    <ul className="list-disc list-inside space-y-1 text-xs">
+                      <li>
+                        크롬 설정 → 고급 → 사이트 설정 → 쿠키에서 '모든 쿠키
+                        허용'
+                      </li>
+                      <li>
+                        크롬 설정 → 고급 → 사이트 설정 → 팝업 및 리디렉션 허용
+                      </li>
+                      <li>시크릿 모드에서 시도해보기</li>
+                      <li>브라우저 캐시 및 쿠키 삭제 후 재시도</li>
+                    </ul>
+                  </div>
+
                   <button
                     onClick={() => {
                       setError(null);
                       setDebugLog([]);
                     }}
-                    className="mt-2 text-sm text-red-600 hover:text-red-800 underline font-medium"
+                    className="mt-3 text-sm text-red-600 hover:text-red-800 underline font-medium"
                   >
                     다시 시도
                   </button>
