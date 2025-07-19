@@ -139,7 +139,7 @@ export default function JoinPage() {
               </label>
               <div className="flex gap-2">
                 <input
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
                   id="groupId"
                   value={groupId}
                   onChange={(e) => {
@@ -151,7 +151,7 @@ export default function JoinPage() {
                 />
                 <button
                   onClick={handlePasteClick}
-                  className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading}
                 >
                   붙여넣기
@@ -180,7 +180,7 @@ export default function JoinPage() {
                 새로운 기도모임 이름을 입력해주세요
               </label>
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:text-gray-500"
                 id="groupName"
                 value={groupName}
                 onChange={(e) => {
