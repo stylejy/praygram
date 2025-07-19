@@ -3,17 +3,25 @@ import Praycard from './parycard';
 import { FaPlus } from 'react-icons/fa';
 import Link from 'next/link';
 import { getGroupPrayers } from '@/apis/prayers';
-import { get } from 'http';
 import { getGroup } from '@/apis/groups';
+import { PrayerWithReactions } from '@/types/prayer';
 
 interface Props {
   params: Promise<{ groupId: string }>;
 }
+
 export default async function GroupHome({ params }: Props) {
   const { groupId } = await params;
 
-  const prayers = await getGroupPrayers(groupId);
-  const group = await getGroup(groupId);
+  let prayers: PrayerWithReactions[] = [];
+  let group = { name: '로딩 중...' };
+
+  try {
+    prayers = await getGroupPrayers(groupId);
+    group = await getGroup(groupId);
+  } catch (error) {
+    console.error('데이터 로드 실패:', error);
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-start px-4">
@@ -24,17 +32,18 @@ export default async function GroupHome({ params }: Props) {
         {prayers?.map((prayer) => (
           <Praycard
             key={prayer.id}
-            prayer={prayer.prayer}
-            time={prayer.edited_at}
-            user={prayer.user.nickname}
-            prayCount={prayer.reaction?.prayCount ?? 0}
+            prayer={prayer.title}
+            content={prayer.content}
+            time={prayer.created_at}
+            user={prayer.author?.nickname || '알 수 없음'}
+            prayCount={prayer.reaction_count || 0}
           />
         ))}
       </main>
       <Link href={`/${groupId}/add`}>
-        <button className="flex items-center fixed bottom-7 right-4 w-30 h-14 px-5 bg-slate-100 text-slate-500 rounded-full shadow-md">
+        <button className="flex items-center fixed bottom-7 right-4 w-30 h-14 px-5 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600">
           <FaPlus className="w-5 h-5 mr-2" />
-          나의 기도 제목
+          기도제목 추가
         </button>
       </Link>
     </div>

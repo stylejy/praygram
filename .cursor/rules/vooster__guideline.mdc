@@ -1,0 +1,251 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Code Guidelines for Praygram
+
+## 1. Project Overview  
+Praygram is a Next.js-based PWA using SSR/ISR, TypeScript, Supabase (Postgres/Auth/Storage), Workbox service workers, and Vercel hosting. Key architectural decisions:  
+- **SSR & ISR** via Next.js for fast first-load and on-demand regeneration  
+- **Feature-based domain modules**: user, auth, group, prayer, reaction  
+- **RESTful API Routes** under `/pages/api/*`  
+- **Client state** with React Context & SWR (stale-while-revalidate)  
+- **Offline support** via Workbox + custom `sw.js`  
+- **Auth & Security** by Supabase JWT + RLS  
+
+---
+
+## 2. Core Principles  
+1. **Single Responsibility (SRP)**: Each file/function ≤200 LOC, one purpose only.  
+2. **Strong Typing**: All public APIs, React props, and services use explicit TypeScript types/interfaces.  
+3. **Secure by Default**: Validate JWT on every API route, enforce Supabase RLS policies.  
+4. **Consistent Data Fetching**: All remote data uses SWR with centralized error/retry logic.  
+5. **Performance-First**: Optimize images (`next/image`), use ISR, minimal bundle via Tailwind JIT.  
+
+---
+
+## 3. Language-Specific Guidelines
+
+### 3.1 TypeScript & Next.js  
+- **File Organization**:  
+  - pages/  
+    - api/{auth,groups,prayers,reactions}/*.ts  
+    - _app.tsx, index.tsx, [feature]/*.tsx  
+  - components/{Auth,Group,Prayer,Reaction}/*.tsx  
+  - services/*.ts, lib/*.ts, hooks/*.ts, styles/*.css, sw.js  
+- **Imports**:  
+  - Use absolute imports via `tsconfig.json` paths (`@/components/...`).  
+  - Group imports: external libs → aliases → relative → styles.  
+- **Error Handling**:  
+  - Wrap async logic in `try/catch`, throw `ApiError` with HTTP status/code.  
+  - In SWR hooks, use `errorRetryCount` and custom `onError`.  
+
+### 3.2 Supabase & API Routes  
+- Initialize single `supabaseClient` in `lib/supabaseClient.ts`.  
+- Validate session token on every API route:  
+  ```ts
+  const token = req.headers.authorization?.split(" ")[1];
+  const { user, error } = await supabase.auth.api.getUser(token);
+  if (error) throw new ApiError(401, "Unauthorized");
+  ```  
+- Enforce RLS filters in database; never bypass with `supabase.rpc()`.  
+
+### 3.3 Workbox & Service Worker  
+- Register `sw.js` in `_app.tsx` when `navigator.serviceWorker` available.  
+- Cache strategies:  
+  - `networkFirst` for `/api/*`  
+  - `staleWhileRevalidate` for images and static assets  
+
+---
+
+## 4. Code Style Rules
+
+### 4.1 MUST Follow  
+1. **Named Exports Only**  
+   - Rationale: Easier refactoring and tree-shaking.  
+   ```ts
+   // MUST
+   export function fetchPrayers(): Promise<Prayer[]> { ... }
+   ```  
+2. **Explicit Return Types**  
+   - Rationale: Prevent inference drift.  
+   ```ts
+   // MUST
+   export async function getServerSideProps(): Promise<GetServerSidePropsResult<Props>> {
+     return { props: {} };
+   }
+   ```  
+3. **Descriptive Type Aliases/Interfaces**  
+   - Rationale: Centralized contracts for DTOs.  
+   ```ts
+   // MUST
+   export interface Prayer { id: string; title: string; content: string; createdAt: string; }
+   ```  
+4. **SWR Hooks for Fetching**  
+   - Rationale: Stale-while-revalidate, auto cache.  
+   ```ts
+   // MUST
+   import useSWR from 'swr';
+   export function usePrayers() {
+     return useSWR<Prayer[]>('/api/prayers', fetcher, { revalidateOnFocus: false });
+   }
+   ```  
+5. **Tailwind Utility Classes**  
+   - Rationale: Consistent, minimal CSS.  
+   ```tsx
+   // MUST
+   <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+     Pray
+   </button>
+   ```  
+
+### 4.2 MUST NOT Do  
+1. **Avoid `any` or Non-strict Types**  
+   - Anti-pattern: defeats TS safety.  
+   ```ts
+   // MUST NOT
+   export function fetchAnyData(): any { /* ... */ }
+   ```  
+2. **No Inline Styles**  
+   - Anti-pattern: breaks Tailwind consistency.  
+   ```tsx
+   // MUST NOT
+   <div style={{ margin: '10px', color: 'red' }}>Bad</div>
+   ```  
+3. **No Large Multi-Responsibility Files**  
+   - Anti-pattern: hard to maintain.  
+   ```ts
+   // MUST NOT
+   // 800 LOC with services, models, handlers in one file
+   ```  
+4. **No Blocking UI during Fetch**  
+   - Anti-pattern: avoid `window.alert` or sync loops.  
+5. **No Direct DOM Manipulation**  
+   - Anti-pattern: conflicts with React.  
+
+---
+
+## 5. Architecture Patterns
+
+### 5.1 Component & Module Structure  
+- **Feature Folder**: Each domain has its folder with components, services, types, hooks.  
+- **Shared**: `/components/ui`, `/lib`, `/hooks`.  
+- **Pages** use `getServerSideProps` or `getStaticProps` per route need.
+
+### 5.2 Data Flow  
+- **Fetch**: SWR `useXYZ` → RESTful `/api/xyz` → Supabase.  
+- **Cache**: SWR + service worker.  
+- **Sync**: Service worker background sync for offline writes.
+
+### 5.3 State Management  
+- **Auth State**: `AuthContext` with `useAuth()` hook, stores JWT + user.  
+- **Global UI State**: small, use React Context for theme/dark mode.  
+- **No Redux**: prefer built-in Context + SWR.
+
+### 5.4 API Design  
+- **RESTful Endpoints**:  
+  - `GET /api/prayers` → list  
+  - `POST /api/prayers` → create  
+  - `PUT /api/prayers/[id]` → update  
+  - `DELETE /api/prayers/[id]` → delete  
+- **HTTP Status Codes**: 200, 201, 400, 401, 404, 500.  
+- **Error Payload**: `{ error: { code: string; message: string; } }`
+
+---
+
+## 6. Example Code Snippets
+
+### 6.1 Valid API Route  
+```ts
+// pages/api/prayers/index.ts
+import { NextApiRequest, NextApiResponse } from 'next';
+import { supabase } from '@/lib/supabaseClient';
+import { Prayer } from '@/services/prayerService';
+import { ApiError } from '@/lib/errors';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  try {
+    const token = req.headers.authorization?.split(' ')[1] ?? '';
+    const { user, error: authErr } = await supabase.auth.api.getUser(token);
+    if (authErr || !user) throw new ApiError(401, 'Unauthorized');
+
+    if (req.method === 'GET') {
+      const { data, error } = await supabase
+        .from<Prayer>('prayers')
+        .select('*')
+        .order('createdAt', { ascending: false });
+      if (error) throw new ApiError(500, error.message);
+      return res.status(200).json(data);
+    }
+    throw new ApiError(405, 'Method Not Allowed');
+  } catch (err) {
+    const { status = 500, message } = ApiError.parse(err);
+    return res.status(status).json({ error: { code: String(status), message } });
+  }
+}
+```
+
+### 6.2 Forbidden Pattern  
+```ts
+// pages/api/prayers.ts
+// MUST NOT: Single file for all methods, untyped, no auth check
+export default async function handler(req, res) {
+  const all = await supabase.from('prayers').select('*'); // no error handling
+  res.json(all);
+}
+```
+
+### 6.3 SWR Hook  
+```ts
+// hooks/usePrayers.ts
+import useSWR from 'swr';
+import { Prayer } from '@/services/prayerService';
+
+const fetcher = (url: string) =>
+  fetch(url).then(r => r.json());
+
+export function usePrayers() {
+  return useSWR<Prayer[]>('/api/prayers', fetcher, {
+    errorRetryCount: 3,
+    revalidateOnFocus: true,
+  });
+}
+```
+
+### 6.4 React Component  
+```tsx
+// components/Prayer/List.tsx
+import React from 'react';
+import { usePrayers } from '@/hooks/usePrayers';
+
+export function PrayerList() {
+  const { data, error } = usePrayers();
+  if (error) return <p className="text-red-500">Failed to load.</p>;
+  if (!data) return <p>Loading...</p>;
+  return (
+    <ul className="space-y-2">
+      {data.map(p => (
+        <li key={p.id} className="p-4 bg-white rounded shadow">
+          <h3 className="text-lg font-semibold">{p.title}</h3>
+          <p>{p.content}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### 6.5 Forbidden React Pattern  
+```tsx
+// components/PrayerListBad.tsx
+// MUST NOT: no loading/error handling, inline style
+export function PrayerListBad() {
+  const data = fetch('/api/prayers').then(res => res.json());
+  return <div style={{ color: 'red' }}>{data.map(p => <div>{p.title}</div>)}</div>;
+}
+```
+
+---
+
+_End of Code Guidelines_

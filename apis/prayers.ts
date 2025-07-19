@@ -1,41 +1,112 @@
-import { createSupabaseBrowserClient } from '@/lib/supabase';
+import {
+  Prayer,
+  CreatePrayerRequest,
+  UpdatePrayerRequest,
+  PrayerWithReactions,
+} from '@/types/prayer';
 
-interface Reaction {
-  prayCount: number;
+const API_BASE = '/api/prayers';
+
+// 기도제목 목록 조회
+export async function getGroupPrayers(
+  groupId: string
+): Promise<PrayerWithReactions[]> {
+  const response = await fetch(`${API_BASE}?group_id=${groupId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch prayers: ${response.statusText}`);
+  }
+
+  return response.json();
 }
 
-interface Prayer {
-  id: string;
-  prayer: string;
-  edited_at: string;
-  reaction: Reaction | null;
-  user: {
-    nickname: string;
-  };
+// 개별 기도제목 조회
+export async function getPrayer(id: string): Promise<PrayerWithReactions> {
+  const response = await fetch(`${API_BASE}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch prayer: ${response.statusText}`);
+  }
+
+  return response.json();
 }
-export const getGroupPrayers = async (groupId: string) => {
-  const supabase = createSupabaseBrowserClient();
-  const result = await supabase
-    .from('prayers')
-    .select('id, prayer, reaction, edited_at, user(nickname)')
-    .eq('group', groupId);
 
-  return result.data as unknown as Prayer[];
-};
+// 기도제목 생성
+export async function createPrayer(data: CreatePrayerRequest): Promise<Prayer> {
+  const response = await fetch(API_BASE, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+    },
+    body: JSON.stringify(data),
+  });
 
-export const getMyPrayers = async (userId: string) => {
-  const supabase = createSupabaseBrowserClient();
-  const result = await supabase.from('prayers').select('*').eq('user', userId);
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Failed to create prayer');
+  }
 
-  return result.data;
-};
+  return response.json();
+}
 
-export const createPrayers = async (groupId: string, prayer: string) => {
-  const supabase = createSupabaseBrowserClient();
-  const result = await supabase
-    .from('prayers')
-    .insert([{ group: groupId, prayer }])
-    .select();
+// 기도제목 수정
+export async function updatePrayer(
+  id: string,
+  data: UpdatePrayerRequest
+): Promise<Prayer> {
+  const response = await fetch(`${API_BASE}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+    },
+    body: JSON.stringify(data),
+  });
 
-  return result.data;
-};
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Failed to update prayer');
+  }
+
+  return response.json();
+}
+
+// 기도제목 삭제
+export async function deletePrayer(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Failed to delete prayer');
+  }
+}
+
+// 내 기도제목 조회 (사용자별)
+export async function getMyPrayers(): Promise<PrayerWithReactions[]> {
+  // 현재 사용자의 모든 그룹 기도제목을 조회
+  const response = await fetch(`${API_BASE}?my_prayers=true`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch my prayers: ${response.statusText}`);
+  }
+
+  return response.json();
+}

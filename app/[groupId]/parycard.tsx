@@ -3,23 +3,29 @@ import { LiaPrayingHandsSolid } from 'react-icons/lia';
 
 interface Props {
   prayer: string;
+  content?: string;
   time: string;
   user: string;
   prayCount: number;
 }
 
 export default function Praycard(props: Props) {
-  const { prayer, time, user, prayCount } = props;
+  const { prayer, content, time, user, prayCount } = props;
   return (
     <div className="flex flex-col items-center justify-center w-full h-fit bg-white/70 rounded-3xl shadow-md backdrop-blur-lg p-5">
-      <header className="text-gray-400 font-semibold">
+      <header className="text-gray-400 font-semibold text-center mb-2">
         {user} 님의 기도제목
       </header>
       <div className="flex flex-row items-center justify-center w-full pb-4">
         <time className="text-xs text-gray-400">{getFormattedTime(time)}</time>
       </div>
-      <article className="text-wrap text-gray-700">
-        <pre className="whitespace-pre-wrap break-words">{prayer}</pre>
+      <article className="text-wrap text-gray-700 w-full">
+        <h3 className="font-semibold text-lg mb-2 text-center">{prayer}</h3>
+        {content && (
+          <div className="text-sm text-gray-600 mt-2">
+            <pre className="whitespace-pre-wrap break-words">{content}</pre>
+          </div>
+        )}
       </article>
       {/**
       <div className="flex flex-col items-center justify-center mt-4">
