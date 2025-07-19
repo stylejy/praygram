@@ -89,31 +89,43 @@ export default function JoinPage() {
   // 텍스트에서 그룹 ID 또는 초대 코드 추출
   const extractGroupIdFromText = (text: string): string => {
     const trimmedText = text.trim();
+    console.log('원본 텍스트:', trimmedText);
 
     // 초대 링크 패턴 확인 (/join/{groupId})
-    const linkMatch = trimmedText.match(/\/join\/([a-f0-9-]{36})/i);
+    const uuidRegex =
+      /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i;
+    const linkMatch = trimmedText.match(
+      new RegExp(`/join/(${uuidRegex.source})`, 'i')
+    );
     if (linkMatch) {
+      console.log('링크에서 추출된 그룹 ID:', linkMatch[1]);
       return linkMatch[1]; // 그룹 ID 반환
     }
 
     // URL에서 그룹 ID 추출 시도
     try {
       const url = new URL(trimmedText);
-      const pathMatch = url.pathname.match(/\/join\/([a-f0-9-]{36})/i);
+      console.log('URL 파싱 성공:', url.pathname);
+      const pathMatch = url.pathname.match(
+        new RegExp(`/join/(${uuidRegex.source})`, 'i')
+      );
       if (pathMatch) {
+        console.log('URL에서 추출된 그룹 ID:', pathMatch[1]);
         return pathMatch[1];
       }
-    } catch {
-      // URL이 아닌 경우 무시
+    } catch (error) {
+      console.log('URL 파싱 실패:', error);
     }
 
     // UUID 형태인지 확인 (초대 코드)
     const uuidPattern =
       /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
     if (uuidPattern.test(trimmedText)) {
+      console.log('UUID 패턴 매치:', trimmedText);
       return trimmedText;
     }
 
+    console.log('패턴 매치 실패, 원본 반환:', trimmedText);
     // 그 외의 경우 원본 텍스트 반환
     return trimmedText;
   };

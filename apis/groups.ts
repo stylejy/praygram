@@ -104,34 +104,47 @@ export const joinGroupSmart = async (
   input: string
 ): Promise<JoinGroupByInviteResponse> => {
   const trimmedInput = input.trim();
+  console.log('joinGroupSmart - 입력값:', trimmedInput);
 
   // 링크에서 그룹 ID 추출
   let groupId = trimmedInput;
 
   // 초대 링크 패턴 확인 (/join/{groupId})
-  const linkMatch = trimmedInput.match(/\/join\/([a-f0-9-]{36})/i);
+  const uuidRegex =
+    /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i;
+  const linkMatch = trimmedInput.match(
+    new RegExp(`/join/(${uuidRegex.source})`, 'i')
+  );
   if (linkMatch) {
     groupId = linkMatch[1];
+    console.log('joinGroupSmart - 링크에서 추출된 그룹 ID:', groupId);
   } else {
     // URL에서 그룹 ID 추출 시도
     try {
       const url = new URL(trimmedInput);
-      const pathMatch = url.pathname.match(/\/join\/([a-f0-9-]{36})/i);
+      const pathMatch = url.pathname.match(
+        new RegExp(`/join/(${uuidRegex.source})`, 'i')
+      );
       if (pathMatch) {
         groupId = pathMatch[1];
+        console.log('joinGroupSmart - URL에서 추출된 그룹 ID:', groupId);
       }
-    } catch {
-      // URL이 아닌 경우 무시하고 원본 사용
+    } catch (error) {
+      console.log('joinGroupSmart - URL 파싱 실패:', error);
     }
   }
+
+  console.log('joinGroupSmart - 최종 그룹 ID:', groupId);
 
   // UUID 형태인지 확인
   const uuidPattern =
     /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
   if (!uuidPattern.test(groupId)) {
+    console.log('joinGroupSmart - UUID 패턴 매치 실패:', groupId);
     throw new Error('올바른 초대 링크 형식이 아닙니다.');
   }
 
+  console.log('joinGroupSmart - UUID 패턴 매치 성공, joinGroupById 호출');
   return await joinGroupById(groupId);
 };
 
