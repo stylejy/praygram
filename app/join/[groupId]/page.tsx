@@ -3,6 +3,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { joinGroup } from '@/apis/members';
 import { useEffect, useCallback, useState } from 'react';
 import { PraygramLogo } from '@/app/components/PraygramLogo';
+import { createSupabaseBrowserClient } from '@/lib/supabase';
 
 export default function JoinGroup() {
   const pathname = usePathname();
@@ -14,20 +15,34 @@ export default function JoinGroup() {
 
   const processJoin = useCallback(
     async (groupId: string) => {
-      // 로그인 확인
-      if (localStorage.getItem('id') === null) {
-        setStatus('checking');
-        // 초대 정보를 localStorage에 저장 (sessionStorage보다 안전)
+      setStatus('checking');
+
+      // Supabase Auth에서 현재 사용자 확인
+      const supabase = createSupabaseBrowserClient();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        // 로그인되지 않은 경우
         localStorage.setItem('pendingInviteGroupId', groupId);
         sessionStorage.setItem('redirectAfterAuth', `/join/${groupId}`);
         window.location.href = '/auth';
         return;
       }
 
+      // localStorage에 사용자 정보 업데이트
+      localStorage.setItem('id', user.id);
+      localStorage.setItem(
+        'nickname',
+        user.user_metadata?.name || user.email || 'User'
+      );
+
       setStatus('joining');
 
       try {
-        const response = await joinGroup(groupId, localStorage.getItem('id')!);
+        const response = await joinGroup(groupId, user.id);
         if (response) {
           // 초대 관련 정보 정리
           localStorage.removeItem('pendingInviteGroupId');

@@ -100,6 +100,36 @@ export const joinGroup = async (groupId: string, memberId: string) => {
 
     if (checkError) {
       console.error('멤버 확인 실패:', checkError);
+
+      // 404 에러인 경우 (멤버가 존재하지 않음)
+      if (checkError.code === 'PGRST116') {
+        // 새 멤버로 생성 시도
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const { data: newMember, error: createError } = await supabase
+            .from('members')
+            .insert([
+              {
+                id: memberId,
+                nickname: user.user_metadata?.name || user.email || 'User',
+                group: groupId,
+                is_manager: false,
+              },
+            ])
+            .select()
+            .single();
+
+          if (createError) {
+            console.error('멤버 생성 실패:', createError);
+            throw new Error('사용자 등록에 실패했습니다. 다시 시도해주세요.');
+          }
+
+          return [newMember];
+        }
+      }
+
       throw new Error('사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
     }
 
