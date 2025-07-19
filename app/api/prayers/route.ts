@@ -2,13 +2,7 @@ import { NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { createErrorResponse, ApiError } from '@/lib/errors';
-
-interface CreatePrayerRequest {
-  title: string;
-  content: string;
-  group_id: string;
-  is_private?: boolean;
-}
+import { CreatePrayerRequest } from '@/types/prayer';
 
 export async function GET(request: NextRequest) {
   try {
@@ -114,6 +108,7 @@ export async function POST(request: NextRequest) {
           content: body.content.trim(),
           group_id: body.group_id,
           author_id: user.id,
+          author_name: body.author_name?.trim(),
           is_private: body.is_private || false,
         },
       ])

@@ -4,6 +4,7 @@ export interface Prayer {
   content: string;
   group_id: string;
   author_id: string;
+  author_name?: string;
   is_private: boolean;
   created_at: string;
   updated_at: string;
@@ -17,6 +18,7 @@ export interface CreatePrayerRequest {
   title: string;
   content: string;
   group_id: string;
+  author_name?: string;
   is_private?: boolean;
 }
 

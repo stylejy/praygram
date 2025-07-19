@@ -102,12 +102,14 @@ export default function Praycard(props: Props) {
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
             <span className="text-white font-semibold text-sm">
-              {(prayer.author?.nickname || '익명').charAt(0).toUpperCase()}
+              {(prayer.author_name || prayer.author?.nickname || '익명')
+                .charAt(0)
+                .toUpperCase()}
             </span>
           </div>
           <div>
             <span className="font-semibold text-gray-900">
-              {prayer.author?.nickname || '익명'}
+              {prayer.author_name || prayer.author?.nickname || '익명'}
             </span>
             {(prayer.is_offline || isOfflineMode) && (
               <div className="flex items-center space-x-2 mt-1">
@@ -126,11 +128,6 @@ export default function Praycard(props: Props) {
               </div>
             )}
           </div>
-        </div>
-        <div className="text-right">
-          <span className="text-sm text-gray-500 font-medium">
-            {getFormattedTimeDisplay(prayer.created_at)}
-          </span>
         </div>
       </div>
 
@@ -164,21 +161,7 @@ export default function Praycard(props: Props) {
             </>
           ) : (
             <>
-              <div
-                className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                  hasReacted
-                    ? 'bg-white/20'
-                    : 'bg-gradient-to-br from-blue-500 to-purple-600'
-                }`}
-              >
-                <span
-                  className={`text-lg ${
-                    hasReacted ? 'text-white' : 'text-white'
-                  }`}
-                >
-                  🙏
-                </span>
-              </div>
+              <span className="text-lg">🙏</span>
               <span className={hasReacted ? 'text-white' : 'text-gray-700'}>
                 {hasReacted ? '기도했습니다' : '기도하기'}
               </span>
@@ -203,9 +186,16 @@ export default function Praycard(props: Props) {
             )}
           </div>
           <span className="font-semibold text-sm">
-            {reactionCount}명이 기도했습니다
+            {reactionCount}번 기도 받았습니다
           </span>
         </div>
+      </div>
+
+      {/* Date/Time */}
+      <div className="mt-4 text-center">
+        <span className="text-sm text-gray-500 font-medium">
+          {getFormattedTimeDisplay(prayer.created_at)}
+        </span>
       </div>
 
       {/* Offline Notice */}

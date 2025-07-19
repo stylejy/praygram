@@ -112,6 +112,7 @@ CREATE TABLE prayers (
   content TEXT NOT NULL CHECK (LENGTH(content) <= 500),
   group_id UUID REFERENCES groups(id) ON DELETE CASCADE,
   author_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  author_name VARCHAR(50),
   is_private BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -123,8 +124,7 @@ CREATE TABLE reactions (
   prayer_id UUID REFERENCES prayers(id) ON DELETE CASCADE,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   type VARCHAR(20) DEFAULT 'pray' CHECK (type IN ('pray', 'amen')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(prayer_id, user_id, type)
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- =================================

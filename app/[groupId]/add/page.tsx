@@ -16,6 +16,7 @@ export default function AddPrayer({ params }: Props) {
   const [groupId, setGroupId] = useState<string>('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [authorName, setAuthorName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
 
@@ -25,6 +26,14 @@ export default function AddPrayer({ params }: Props) {
       setGroupId(groupId);
     });
   }, [params]);
+
+  // localStorage에서 저장된 이름 불러오기
+  useEffect(() => {
+    const savedName = localStorage.getItem('prayerAuthorName');
+    if (savedName) {
+      setAuthorName(savedName);
+    }
+  }, []);
 
   // 온라인/오프라인 상태 모니터링
   useEffect(() => {
@@ -45,8 +54,8 @@ export default function AddPrayer({ params }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim() || !content.trim()) {
-      alert('제목과 내용을 모두 입력해주세요.');
+    if (!title.trim() || !content.trim() || !authorName.trim()) {
+      alert('이름, 제목, 내용을 모두 입력해주세요.');
       return;
     }
 
@@ -57,10 +66,14 @@ export default function AddPrayer({ params }: Props) {
 
     setIsSubmitting(true);
 
+    // 이름을 localStorage에 저장
+    localStorage.setItem('prayerAuthorName', authorName.trim());
+
     const prayerData = {
       group_id: groupId,
       title: title.trim(),
       content: content.trim(),
+      author_name: authorName.trim(),
     };
 
     try {
@@ -169,6 +182,26 @@ export default function AddPrayer({ params }: Props) {
         {/* Form */}
         <div className="glass-card p-8 rounded-3xl slide-up">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Name Input */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3">
+                이름 *
+              </label>
+              <input
+                type="text"
+                value={authorName}
+                onChange={(e) => setAuthorName(e.target.value)}
+                placeholder="이름을 입력하세요"
+                className="glass-input w-full px-4 py-3 rounded-xl text-gray-900 font-medium placeholder-gray-500"
+                maxLength={50}
+                disabled={isSubmitting}
+                required
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                한 번 입력하면 다음에도 자동으로 입력됩니다
+              </p>
+            </div>
+
             {/* Title Input */}
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-3">
