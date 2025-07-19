@@ -237,8 +237,8 @@ export default function AuthPage() {
                     <p className="font-medium">모바일에서 문제가 발생한다면:</p>
                     <ul className="list-disc list-inside space-y-1 text-xs">
                       <li>
-                        크롬 설정 → 고급 → 사이트 설정 → 쿠키에서 '모든 쿠키
-                        허용'
+                        크롬 설정 → 고급 → 사이트 설정 → 쿠키에서 &apos;모든
+                        쿠키 허용&apos;
                       </li>
                       <li>
                         크롬 설정 → 고급 → 사이트 설정 → 팝업 및 리디렉션 허용
