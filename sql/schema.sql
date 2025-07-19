@@ -87,7 +87,6 @@ CREATE TABLE groups (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   description TEXT,
-  invite_code UUID DEFAULT gen_random_uuid() UNIQUE NOT NULL,
   created_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -139,7 +138,6 @@ CREATE INDEX idx_prayers_author_id ON prayers(author_id);
 CREATE INDEX idx_prayers_created_at ON prayers(created_at DESC);
 CREATE INDEX idx_reactions_prayer_id ON reactions(prayer_id);
 CREATE INDEX idx_reactions_user_id ON reactions(user_id);
-CREATE INDEX idx_groups_invite_code ON groups(invite_code);
 
 -- =================================
 -- 트리거 (updated_at 자동 관리)
