@@ -89,15 +89,38 @@ export async function updateMember(
 
 export const joinGroup = async (groupId: string, memberId: string) => {
   const supabase = createSupabaseBrowserClient();
-  const { data, error } = await supabase
-    .from('members')
-    .update({ group: groupId })
-    .eq('id', memberId)
-    .select();
 
-  if (error) {
+  try {
+    // 먼저 멤버가 존재하는지 확인
+    const { data: existingMember, error: checkError } = await supabase
+      .from('members')
+      .select('*')
+      .eq('id', memberId)
+      .single();
+
+    if (checkError) {
+      console.error('멤버 확인 실패:', checkError);
+      throw new Error('사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+    }
+
+    // 그룹 정보 업데이트
+    const { data, error } = await supabase
+      .from('members')
+      .update({ group: groupId })
+      .eq('id', memberId)
+      .select();
+
+    if (error) {
+      console.error('그룹 참여 실패:', error);
+      if (error.code === 'PGRST116') {
+        throw new Error('존재하지 않는 기도모임입니다.');
+      }
+      throw new Error('기도모임 참여에 실패했습니다. 다시 시도해주세요.');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('joinGroup error:', error);
     throw error;
   }
-
-  return data;
 };

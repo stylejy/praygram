@@ -20,7 +20,10 @@ export default function Navbar(props: Props) {
   };
 
   return (
-    <nav className="glass-navbar fixed inset-x-0 top-6 z-50 mx-6 rounded-2xl">
+    <nav
+      className="glass-navbar fixed inset-x-0 z-50 mx-6 rounded-2xl"
+      style={{ top: 'max(1.5rem, env(safe-area-inset-top))' }}
+    >
       <div className="flex items-center justify-between px-6 py-4">
         {/* Logo */}
         <button

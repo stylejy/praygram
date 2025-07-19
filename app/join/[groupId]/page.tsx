@@ -17,7 +17,8 @@ export default function JoinGroup() {
       // 로그인 확인
       if (localStorage.getItem('id') === null) {
         setStatus('checking');
-        // 로그인 페이지로 리다이렉트 (현재 URL을 저장하여 로그인 후 돌아올 수 있도록)
+        // 초대 정보를 localStorage에 저장 (sessionStorage보다 안전)
+        localStorage.setItem('pendingInviteGroupId', groupId);
         sessionStorage.setItem('redirectAfterAuth', `/join/${groupId}`);
         window.location.href = '/auth';
         return;
@@ -28,6 +29,10 @@ export default function JoinGroup() {
       try {
         const response = await joinGroup(groupId, localStorage.getItem('id')!);
         if (response) {
+          // 초대 관련 정보 정리
+          localStorage.removeItem('pendingInviteGroupId');
+          sessionStorage.removeItem('redirectAfterAuth');
+
           setStatus('redirecting');
           setTimeout(() => {
             router.push(`/${groupId}`);
@@ -36,12 +41,20 @@ export default function JoinGroup() {
       } catch (error) {
         console.error('그룹 참여 실패:', error);
         setStatus('error');
-        if ((error as any).details?.includes('Key is not present in table')) {
+
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : '알 수 없는 오류가 발생했습니다.';
+
+        if (errorMessage.includes('존재하지 않는 기도모임')) {
           setErrorMessage(
             '존재하지 않는 기도모임입니다. 초대 링크를 다시 확인해주세요.'
           );
+        } else if (errorMessage.includes('사용자 정보를 찾을 수 없습니다')) {
+          setErrorMessage('로그인 정보가 만료되었습니다. 다시 로그인해주세요.');
         } else {
-          setErrorMessage('기도모임 참여에 실패했습니다. 다시 시도해주세요.');
+          setErrorMessage(errorMessage);
         }
       }
     },

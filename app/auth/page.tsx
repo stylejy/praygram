@@ -163,10 +163,18 @@ export default function AuthPage() {
 
         // 리다이렉트 URL 확인 (초대 링크에서 온 경우)
         const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
+        const pendingInviteGroupId = localStorage.getItem(
+          'pendingInviteGroupId'
+        );
+
         if (redirectUrl) {
           sessionStorage.removeItem('redirectAfterAuth');
           addDebugLog(`초대 링크로 리다이렉트: ${redirectUrl}`);
           router.push(redirectUrl);
+        } else if (pendingInviteGroupId) {
+          // 직접적인 초대 링크 접근인 경우
+          addDebugLog(`대기 중인 초대 그룹으로 이동: ${pendingInviteGroupId}`);
+          router.push(`/join/${pendingInviteGroupId}`);
         } else {
           // 기본: 그룹 선택 페이지로 리다이렉션
           addDebugLog('그룹 선택 페이지로 이동');
