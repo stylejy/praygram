@@ -1,11 +1,8 @@
 import { createSupabaseBrowserClient } from '@/lib/supabase';
 
-interface Group {
-  name: string;
-}
-
 interface CreateGroupRequest {
   name: string;
+  description?: string;
 }
 
 interface CreateGroupResponse {
@@ -25,12 +22,19 @@ interface JoinGroupByInviteResponse {
   role: string;
 }
 
-export const getGroup = async (groupId: string) => {
-  const supabase = createSupabaseBrowserClient();
-  const result = await supabase.from('groups').select('*').eq('id', groupId);
-
-  return (result.data as unknown as Group[])[0];
-};
+interface GetUserGroupsResponse {
+  groups: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    invite_code: string;
+    created_at: string;
+    group_members: Array<{
+      user_id: string;
+      role: 'LEADER' | 'MEMBER';
+    }>;
+  }>;
+}
 
 export const createGroup = async (
   name: string
@@ -67,34 +71,7 @@ export const createGroup = async (
   };
 };
 
-export const joinGroupByInviteCode = async (
-  inviteCode: string
-): Promise<JoinGroupByInviteResponse> => {
-  const supabase = createSupabaseBrowserClient();
-  const { data: session } = await supabase.auth.getSession();
-
-  if (!session?.session?.access_token) {
-    throw new Error('Authentication required');
-  }
-
-  const response = await fetch('/api/groups/invite', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${session.session.access_token}`,
-    },
-    body: JSON.stringify({ inviteCode }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error?.message || 'Failed to join group');
-  }
-
-  return response.json();
-};
-
-// 그룹 ID로 직접 참여하는 함수
+// 그룹 ID로 직접 참여하는 함수 (메인 참여 방식)
 export const joinGroupById = async (
   groupId: string
 ): Promise<JoinGroupByInviteResponse> => {
@@ -122,32 +99,43 @@ export const joinGroupById = async (
   return response.json();
 };
 
-// 스마트 그룹 참여 함수 - 그룹 ID 또는 초대 코드 자동 감지
+// 스마트 그룹 참여 함수 - 링크에서 그룹 ID 추출하여 참여
 export const joinGroupSmart = async (
   input: string
 ): Promise<JoinGroupByInviteResponse> => {
   const trimmedInput = input.trim();
 
-  // UUID 형태 확인 (36자리 하이픈 포함)
+  // 링크에서 그룹 ID 추출
+  let groupId = trimmedInput;
+
+  // 초대 링크 패턴 확인 (/join/{groupId})
+  const linkMatch = trimmedInput.match(/\/join\/([a-f0-9-]{36})/i);
+  if (linkMatch) {
+    groupId = linkMatch[1];
+  } else {
+    // URL에서 그룹 ID 추출 시도
+    try {
+      const url = new URL(trimmedInput);
+      const pathMatch = url.pathname.match(/\/join\/([a-f0-9-]{36})/i);
+      if (pathMatch) {
+        groupId = pathMatch[1];
+      }
+    } catch {
+      // URL이 아닌 경우 무시하고 원본 사용
+    }
+  }
+
+  // UUID 형태인지 확인
   const uuidPattern =
     /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
-
-  if (uuidPattern.test(trimmedInput)) {
-    // UUID 형태인 경우, 먼저 그룹 ID로 시도
-    try {
-      return await joinGroupById(trimmedInput);
-    } catch (error) {
-      // 그룹 ID로 실패하면 초대 코드로 시도
-      console.log('그룹 ID로 참여 실패, 초대 코드로 재시도:', error);
-      return await joinGroupByInviteCode(trimmedInput);
-    }
-  } else {
-    // UUID 형태가 아닌 경우 초대 코드로 처리
-    return await joinGroupByInviteCode(trimmedInput);
+  if (!uuidPattern.test(groupId)) {
+    throw new Error('올바른 초대 링크 형식이 아닙니다.');
   }
+
+  return await joinGroupById(groupId);
 };
 
-export const getUserGroups = async () => {
+export const getUserGroups = async (): Promise<GetUserGroupsResponse> => {
   const supabase = createSupabaseBrowserClient();
   const { data: session } = await supabase.auth.getSession();
 
@@ -155,7 +143,7 @@ export const getUserGroups = async () => {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch('/api/groups', {
+  const response = await fetch('/api/groups/user', {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${session.session.access_token}`,

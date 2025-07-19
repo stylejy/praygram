@@ -1,10 +1,6 @@
 'use client';
 import { joinGroup } from '@/apis/members';
-import {
-  createGroup,
-  joinGroupByInviteCode,
-  joinGroupSmart,
-} from '@/apis/groups';
+import { createGroup, joinGroupSmart } from '@/apis/groups';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
@@ -20,7 +16,7 @@ export default function JoinPage() {
 
   const handleJoinButtonClick = async () => {
     if (!groupId || localStorage.getItem('id') === null) {
-      setErrorMessage('기도모임 아이디를 입력해주세요.');
+      setErrorMessage('초대 링크를 입력해주세요.');
       return;
     }
 
@@ -43,7 +39,7 @@ export default function JoinPage() {
     } catch (error) {
       console.error('그룹 참여 실패:', error);
       setErrorMessage(
-        '기도모임을 찾을 수 없거나 참여할 수 없습니다. 초대 코드나 링크를 다시 확인해주세요.'
+        '기도모임을 찾을 수 없거나 참여할 수 없습니다. 초대 링크를 다시 확인해주세요.'
       );
     } finally {
       setIsLoading(false);
@@ -200,20 +196,20 @@ export default function JoinPage() {
                   기도모임 참여
                 </h2>
                 <p className="text-gray-600 text-sm">
-                  초대 코드를 입력하여 기도모임에 참여하세요
+                  초대 링크를 입력하여 기도모임에 참여하세요
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">
-                  초대 코드 또는 링크 *
+                  초대 링크 *
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={groupId}
                     onChange={(e) => setGroupId(e.target.value)}
-                    placeholder="초대 코드 또는 링크를 입력하세요"
+                    placeholder="초대 링크를 입력하세요"
                     className="glass-input flex-1 px-4 py-3 rounded-xl text-gray-900 font-medium placeholder-gray-500"
                     disabled={isLoading}
                   />
@@ -227,7 +223,7 @@ export default function JoinPage() {
                   </button>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  초대 코드 또는 공유받은 링크를 입력해주세요
+                  기도모임 리더에게 받은 초대 링크를 입력해주세요
                 </p>
               </div>
 

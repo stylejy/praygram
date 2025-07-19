@@ -2,11 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  getUserGroups,
-  createGroup,
-  joinGroupByInviteCode,
-} from '@/apis/groups';
+import { getUserGroups, createGroup, joinGroupSmart } from '@/apis/groups';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
 import { PraygramLogo } from '@/app/components/PraygramLogo';
 
@@ -83,7 +79,7 @@ export default function GroupsPage() {
 
   const handleJoinGroup = async () => {
     if (!inviteCode.trim()) {
-      setError('초대 코드를 입력해주세요.');
+      setError('초대 링크를 입력해주세요.');
       return;
     }
 
@@ -91,7 +87,7 @@ export default function GroupsPage() {
     setError('');
 
     try {
-      const response = await joinGroupByInviteCode(inviteCode.trim());
+      const response = await joinGroupSmart(inviteCode.trim());
       if (response) {
         localStorage.setItem('group', response.groupId);
         localStorage.setItem(
@@ -102,7 +98,7 @@ export default function GroupsPage() {
       }
     } catch (error) {
       console.error('그룹 참여 실패:', error);
-      setError('그룹 참여에 실패했습니다. 초대 코드를 확인해주세요.');
+      setError('그룹 참여에 실패했습니다. 초대 링크를 확인해주세요.');
     } finally {
       setIsActionLoading(false);
     }
@@ -316,7 +312,7 @@ export default function GroupsPage() {
                     type="text"
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value)}
-                    placeholder="초대 코드를 입력하세요"
+                    placeholder="초대 링크를 입력하세요"
                     className="glass-input flex-1 px-4 py-3 rounded-xl font-medium"
                     disabled={isActionLoading}
                   />
