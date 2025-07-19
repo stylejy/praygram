@@ -191,31 +191,10 @@ export default function GroupsPage() {
                       </span>
                     </div>
                     {group.description && (
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      <p className="text-sm text-gray-600 line-clamp-2">
                         {group.description}
                       </p>
                     )}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-gray-500">
-                        <span className="text-sm">👥</span>
-                        <span className="text-sm">멤버</span>
-                      </div>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg
-                          className="w-5 h-5 text-gray-700"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </div>
-                    </div>
                   </div>
                 );
               })}

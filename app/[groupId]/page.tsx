@@ -65,9 +65,11 @@ export default function GroupHome({ params }: Props) {
 
         if (!session?.session?.access_token) {
           console.error('No access token available');
+          setGroupName('인증 필요');
           return;
         }
 
+        console.log('그룹 정보 요청:', groupId);
         const response = await fetch(`/api/groups/${groupId}`, {
           headers: {
             Authorization: `Bearer ${session.session.access_token}`,
@@ -76,9 +78,12 @@ export default function GroupHome({ params }: Props) {
 
         if (response.ok) {
           const group = await response.json();
-          setGroupName(group.name);
+          console.log('그룹 정보 응답:', group);
+          setGroupName(group.name || '이름 없음');
         } else {
           console.error('Failed to fetch group:', response.status);
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Error data:', errorData);
           setGroupName('그룹 정보 없음');
         }
       } catch (error) {
