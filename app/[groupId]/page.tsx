@@ -30,6 +30,19 @@ export default function GroupHome({ params }: Props) {
   const { prayers, isLoading, error } = useRealtimePrayers(groupId);
   useRealtimeReactions(groupId);
 
+  // 로딩 스피너 컴포넌트
+  const LoadingSpinner = () => (
+    <div className="text-center py-20 fade-in">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mb-6 animate-spin">
+        <div className="w-12 h-12 rounded-full border-4 border-white border-t-transparent"></div>
+      </div>
+      <h3 className="text-xl font-semibold text-gray-700 mb-2">
+        기도제목을 불러오는 중...
+      </h3>
+      <p className="text-gray-500">잠시만 기다려주세요</p>
+    </div>
+  );
+
   // 초대 기능
   const handleInvite = async () => {
     console.log('초대 링크 생성 - 현재 groupId:', groupId);
@@ -141,33 +154,8 @@ export default function GroupHome({ params }: Props) {
       <main className="pt-24 px-4 pb-20 md:pb-0">
         <div className="max-w-2xl mx-auto">
           {isLoading ? (
-            <div className="space-y-6">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="glass-card p-6 rounded-2xl slide-up pulse-animation"
-                  style={{ animationDelay: `${i * 0.1}s` }}
-                >
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
-                    <div className="space-y-2 flex-1">
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/3"></div>
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-1/4"></div>
-                    </div>
-                  </div>
-                  <div className="space-y-2 mb-4">
-                    <div className="h-5 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></div>
-                  </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="h-10 bg-gray-200 rounded-xl animate-pulse w-32"></div>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : prayers.length === 0 ? (
+            <LoadingSpinner />
+          ) : prayers && prayers.length === 0 ? (
             <div className="text-center py-20 fade-in">
               <PraygramLogo size="xl" className="mx-auto mb-6" />
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
@@ -184,7 +172,7 @@ export default function GroupHome({ params }: Props) {
                 <span>첫 기도제목 등록하기</span>
               </Link>
             </div>
-          ) : (
+          ) : prayers ? (
             <div className="space-y-6 fade-in">
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-2">
@@ -205,7 +193,7 @@ export default function GroupHome({ params }: Props) {
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </div>
       </main>
 

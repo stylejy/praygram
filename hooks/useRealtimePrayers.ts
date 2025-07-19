@@ -28,12 +28,11 @@ export function useRealtimePrayers(groupId: string) {
     {
       revalidateOnFocus: false,
       errorRetryCount: 3,
-      fallbackData: [],
     }
   );
 
-  // 오프라인 데이터와 병합
-  const mergedPrayers = prayers ? mergeOfflineData(prayers, groupId) : [];
+  // 오프라인 데이터와 병합 (로딩 중일 때는 undefined 유지)
+  const mergedPrayers = prayers ? mergeOfflineData(prayers, groupId) : prayers;
 
   // 온라인 상태 복구 시 동기화
   useEffect(() => {
