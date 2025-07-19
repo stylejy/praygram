@@ -20,18 +20,22 @@ export default function Praycard(props: Props) {
   const [hasReacted, setHasReacted] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [isMyPrayer, setIsMyPrayer] = useState(false);
 
   // 현재 사용자 ID 가져오기
   useEffect(() => {
     const userId = localStorage.getItem('id');
     setCurrentUserId(userId);
 
+    // 내 기도 카드인지 확인
+    setIsMyPrayer(userId === prayer.author_id);
+
     // 현재 사용자가 이미 리액션했는지 확인
     if (userId && prayer.reactions) {
       const userReaction = prayer.reactions.find((r) => r.user_id === userId);
       setHasReacted(!!userReaction);
     }
-  }, [prayer.reactions]);
+  }, [prayer.reactions, prayer.author_id]);
 
   // 온라인/오프라인 상태 모니터링
   useEffect(() => {
@@ -142,32 +146,39 @@ export default function Praycard(props: Props) {
       </div>
 
       {/* Action Bar */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100/50">
-        <button
-          onClick={handleReactionClick}
-          disabled={isReactionDisabled}
-          className={`glass-button flex items-center space-x-3 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
-            isReactionDisabled
-              ? 'opacity-50 cursor-not-allowed'
-              : hasReacted
-              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-              : 'hover:scale-105'
-          }`}
-        >
-          {isReacting ? (
-            <>
-              <LoadingSpinner />
-              <span>처리 중...</span>
-            </>
-          ) : (
-            <>
-              <span className="text-lg">🙏</span>
-              <span className={hasReacted ? 'text-white' : 'text-gray-700'}>
-                {hasReacted ? '기도했습니다' : '기도하기'}
-              </span>
-            </>
-          )}
-        </button>
+      <div
+        className={`pt-4 border-t border-gray-100/50 ${
+          isMyPrayer ? 'flex justify-end' : 'flex items-center justify-between'
+        }`}
+      >
+        {/* 기도하기 버튼 - 내 기도 카드가 아닌 경우만 표시 */}
+        {!isMyPrayer && (
+          <button
+            onClick={handleReactionClick}
+            disabled={isReactionDisabled}
+            className={`glass-button flex items-center space-x-3 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+              isReactionDisabled
+                ? 'opacity-50 cursor-not-allowed'
+                : hasReacted
+                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                : 'hover:scale-105'
+            }`}
+          >
+            {isReacting ? (
+              <>
+                <LoadingSpinner />
+                <span>처리 중...</span>
+              </>
+            ) : (
+              <>
+                <span className="text-lg">🙏</span>
+                <span className={hasReacted ? 'text-white' : 'text-gray-700'}>
+                  {hasReacted ? '기도했습니다' : '기도하기'}
+                </span>
+              </>
+            )}
+          </button>
+        )}
 
         <div className="flex items-center space-x-2 text-gray-600">
           <div className="flex -space-x-1">
