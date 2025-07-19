@@ -122,6 +122,12 @@ export default function AuthPage() {
       console.error('Kakao login error:', error);
       addDebugLog(`카카오 로그인 실패: ${error.message || error}`);
 
+      // 환경 변수 에러 처리
+      if (error.message?.includes('Missing required environment variables')) {
+        setError('서버 설정 오류가 발생했습니다. 관리자에게 문의해주세요.');
+        return;
+      }
+
       // 더 구체적인 에러 메시지
       let errorMessage = '카카오 로그인에 실패했습니다.';
 
