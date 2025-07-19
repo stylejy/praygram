@@ -91,71 +91,70 @@ export const joinGroup = async (groupId: string, memberId: string) => {
   const supabase = createSupabaseBrowserClient();
 
   try {
-    // 먼저 멤버가 존재하는지 확인
-    const { data: existingMember, error: checkError } = await supabase
-      .from('members')
-      .select('*')
-      .eq('id', memberId)
+    console.log('joinGroup 호출 - groupId:', groupId, 'memberId:', memberId);
+
+    // 그룹 존재 확인
+    const { data: group, error: groupError } = await supabase
+      .from('groups')
+      .select('id, name')
+      .eq('id', groupId)
       .single();
 
-    if (checkError) {
-      console.error('멤버 확인 실패:', checkError);
-
-      // 404 에러인 경우 (멤버가 존재하지 않음)
-      if (checkError.code === 'PGRST116') {
-        // 새 멤버로 생성 시도
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user) {
-          const { data: newMember, error: createError } = await supabase
-            .from('members')
-            .insert([
-              {
-                id: memberId,
-                nickname: user.user_metadata?.name || user.email || 'User',
-                group: groupId,
-                is_manager: false,
-              },
-            ])
-            .select()
-            .single();
-
-          if (createError) {
-            console.error('멤버 생성 실패:', createError);
-            throw new Error('사용자 등록에 실패했습니다. 다시 시도해주세요.');
-          }
-
-          return newMember;
-        }
-      }
-
-      throw new Error('사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+    if (groupError || !group) {
+      console.error('그룹 조회 실패:', groupError);
+      throw new Error(
+        '존재하지 않는 기도모임입니다. 초대 링크를 다시 확인해주세요.'
+      );
     }
 
-    // 이미 그룹에 속해있는지 확인
-    if (existingMember.group === groupId) {
-      console.log('이미 그룹에 속해있습니다:', groupId);
-      return existingMember;
-    }
+    console.log('그룹 조회 성공:', group);
 
-    // 그룹 정보 업데이트
-    const { data, error } = await supabase
-      .from('members')
-      .update({ group: groupId })
-      .eq('id', memberId)
-      .select()
+    // 이미 해당 그룹의 멤버인지 확인
+    const { data: existingMember, error: memberCheckError } = await supabase
+      .from('group_members')
+      .select('role')
+      .eq('group_id', groupId)
+      .eq('user_id', memberId)
       .single();
 
-    if (error) {
-      console.error('그룹 참여 실패:', error);
-      if (error.code === 'PGRST116') {
-        throw new Error('존재하지 않는 기도모임입니다.');
-      }
+    if (existingMember) {
+      console.log('이미 그룹 멤버입니다:', existingMember);
+      return {
+        id: memberId,
+        group: groupId,
+        role: existingMember.role,
+        message: '이미 그룹에 참여하고 있습니다.',
+      };
+    }
+
+    console.log('새 멤버로 추가 시도...');
+
+    // 새 멤버로 추가
+    const { data: newMember, error: insertError } = await supabase
+      .from('group_members')
+      .insert([
+        {
+          group_id: groupId,
+          user_id: memberId,
+          role: 'MEMBER',
+        },
+      ])
+      .select('group_id, user_id, role')
+      .single();
+
+    if (insertError) {
+      console.error('멤버 추가 실패:', insertError);
       throw new Error('기도모임 참여에 실패했습니다. 다시 시도해주세요.');
     }
 
-    return data;
+    console.log('멤버 추가 성공:', newMember);
+
+    return {
+      id: newMember.user_id,
+      group: newMember.group_id,
+      role: newMember.role,
+      message: '그룹 참여가 완료되었습니다.',
+    };
   } catch (error) {
     console.error('joinGroup error:', error);
     throw error;
