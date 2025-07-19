@@ -105,7 +105,7 @@ export default function GroupHome({ params }: Props) {
   return (
     <div className="min-h-screen pb-24">
       {/* Navigation */}
-      <Navbar groupTitle={groupName} />
+      <Navbar groupTitle={groupName} groupId={groupId} />
 
       {/* Main Content */}
       <main className="pt-24 px-4">

@@ -126,9 +126,17 @@ export default function AuthPage() {
         localStorage.setItem('id', authUser.id);
         localStorage.setItem('nickname', authUser.name);
 
-        // 항상 그룹 선택 페이지로 리다이렉션
-        addDebugLog('그룹 선택 페이지로 이동');
-        router.push('/groups');
+        // 리다이렉트 URL 확인 (초대 링크에서 온 경우)
+        const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
+        if (redirectUrl) {
+          sessionStorage.removeItem('redirectAfterAuth');
+          addDebugLog(`초대 링크로 리다이렉트: ${redirectUrl}`);
+          router.push(redirectUrl);
+        } else {
+          // 기본: 그룹 선택 페이지로 리다이렉션
+          addDebugLog('그룹 선택 페이지로 이동');
+          router.push('/groups');
+        }
       } catch (error) {
         console.error('Error processing member:', error);
         const errorMessage =
