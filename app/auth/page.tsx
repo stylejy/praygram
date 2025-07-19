@@ -1,136 +1,95 @@
 'use client';
 
-import { createMembers, getMembers } from '@/apis/members';
-import { createSupabaseBrowserClient } from '@/lib/supabase';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createSupabaseBrowserClient } from '@/lib/supabase';
 import Image from 'next/image';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 interface AuthUser {
   id: string;
   name: string;
+  email: string;
+  avatar?: string;
 }
 
 export default function AuthPage() {
   const router = useRouter();
-  const supabaseBrowserClient = createSupabaseBrowserClient();
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [debugLog, setDebugLog] = useState<string[]>([]);
 
+  const supabaseBrowserClient = createSupabaseBrowserClient();
+
   const addDebugLog = (message: string) => {
-    console.log('[AUTH DEBUG]', message);
-    setDebugLog((prev) => [
-      ...prev,
-      `${new Date().toLocaleTimeString()}: ${message}`,
-    ]);
+    const timestamp = new Date().toLocaleTimeString();
+    setDebugLog((prev) => [...prev, `[${timestamp}] ${message}`]);
   };
 
-  const getAuthUser = useCallback(async () => {
-    try {
-      addDebugLog('인증 사용자 확인 시작');
-      const { data } = await supabaseBrowserClient.auth.getUser();
-      addDebugLog(
-        `사용자 데이터: ${JSON.stringify(
-          data?.user?.id
-            ? { id: data.user.id, hasMetadata: !!data.user.user_metadata }
-            : 'null'
-        )}`
-      );
+  // 기존 세션 확인
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        addDebugLog('기존 세션 확인 중...');
+        const {
+          data: { session },
+        } = await supabaseBrowserClient.auth.getSession();
 
-      const [id, name] = [
-        data?.user?.id,
-        data?.user?.user_metadata.preferred_username ||
-          data?.user?.user_metadata.name ||
-          data?.user?.user_metadata.full_name,
-      ];
-
-      addDebugLog(`추출된 정보 - ID: ${id}, Name: ${name}`);
-
-      if (!id || !name) {
-        addDebugLog('ID 또는 이름이 없음');
-        return;
-      }
-      setAuthUser({
-        id,
-        name,
-      });
-      addDebugLog('AuthUser 설정 완료');
-    } catch (error) {
-      console.error('Error getting user:', error);
-      addDebugLog(`사용자 정보 가져오기 실패: ${error}`);
-      setError('사용자 정보를 가져오는데 실패했습니다.');
-    }
-  }, [supabaseBrowserClient]);
-
-  const saveMember = (member: any) => {
-    addDebugLog(`멤버 정보 저장: ${JSON.stringify(member)}`);
-    localStorage.setItem('id', member.id);
-    localStorage.setItem('name', member.nickname);
-    localStorage.setItem('group', member.group || 'null');
-    localStorage.setItem('isManager', member.is_manager ? 'true' : 'false');
-  };
-
-  const processMember = useCallback(async () => {
-    if (!authUser || isProcessing) {
-      addDebugLog(
-        `멤버 처리 건너뜀 - authUser: ${!!authUser}, isProcessing: ${isProcessing}`
-      );
-      return;
-    }
-
-    addDebugLog('멤버 처리 시작');
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      // 기존 멤버 정보 확인
-      addDebugLog('기존 멤버 정보 확인 중...');
-      const members = await getMembers(authUser.id);
-      addDebugLog(
-        `멤버 조회 결과: ${members ? JSON.stringify(members) : 'null'}`
-      );
-
-      if (members === null) {
-        throw new Error('멤버 정보를 가져오는데 실패했습니다.');
-      }
-
-      let memberData;
-
-      if (members.length === 0) {
-        // 새 멤버 생성
-        addDebugLog('새 멤버 생성 중...');
-        const response = await createMembers(authUser.name);
-        addDebugLog(
-          `멤버 생성 결과: ${response ? JSON.stringify(response) : 'null'}`
-        );
-
-        if (!response || response.length === 0) {
-          throw new Error('멤버 생성에 실패했습니다.');
+        if (session?.user) {
+          addDebugLog(`기존 세션 발견: ${session.user.email}`);
+          setAuthUser({
+            id: session.user.id,
+            name:
+              session.user.user_metadata?.name || session.user.email || 'User',
+            email: session.user.email || '',
+            avatar: session.user.user_metadata?.avatar_url,
+          });
+        } else {
+          addDebugLog('기존 세션 없음');
         }
-        memberData = response[0];
-      } else {
-        memberData = members[0];
+      } catch (error) {
+        console.error('Session check error:', error);
+        addDebugLog(`세션 확인 실패: ${error}`);
       }
+    };
 
-      // localStorage에 저장
-      saveMember(memberData);
+    checkSession();
+  }, []);
 
-      // 항상 그룹 선택 페이지로 리디렉션
-      addDebugLog('그룹 선택 페이지로 이동');
-      router.push('/groups');
-    } catch (error) {
-      console.error('Error processing member:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : '처리 중 오류가 발생했습니다.';
-      addDebugLog(`멤버 처리 실패: ${errorMessage}`);
-      setError(errorMessage);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [authUser, isProcessing, router]);
+  // URL에서 auth 콜백 처리
+  useEffect(() => {
+    const handleAuthCallback = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+
+      if (code) {
+        addDebugLog('OAuth 콜백 코드 발견, 세션 교환 중...');
+        try {
+          const { data, error } =
+            await supabaseBrowserClient.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+
+          if (data.user) {
+            addDebugLog(`OAuth 성공: ${data.user.email}`);
+            setAuthUser({
+              id: data.user.id,
+              name: data.user.user_metadata?.name || data.user.email || 'User',
+              email: data.user.email || '',
+              avatar: data.user.user_metadata?.avatar_url,
+            });
+          }
+        } catch (error) {
+          console.error('Auth callback error:', error);
+          addDebugLog(`OAuth 콜백 실패: ${error}`);
+          setError('로그인 처리 중 오류가 발생했습니다.');
+        }
+      }
+    };
+
+    handleAuthCallback();
+  }, []);
 
   const loginWithKakao = async () => {
     try {
@@ -145,51 +104,73 @@ export default function AuthPage() {
       });
 
       if (error) {
-        console.error('카카오 로그인 에러:', error.message);
-        addDebugLog(`카카오 로그인 에러: ${error.message}`);
-        setError('로그인에 실패했습니다. 다시 시도해주세요.');
-      } else {
-        addDebugLog('카카오 로그인 요청 성공');
+        throw error;
       }
     } catch (error) {
-      console.error('Login error:', error);
-      addDebugLog(`로그인 예외: ${error}`);
-      setError('로그인 중 오류가 발생했습니다.');
+      console.error('Kakao login error:', error);
+      addDebugLog(`카카오 로그인 실패: ${error}`);
+      setError('카카오 로그인에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
-  // 인증 상태 확인
+  // 인증된 사용자 처리
   useEffect(() => {
-    addDebugLog('컴포넌트 마운트됨');
-    getAuthUser();
-  }, [getAuthUser]);
+    if (!authUser || isProcessing) return;
 
-  // 멤버 처리 (authUser가 설정된 후)
-  useEffect(() => {
-    if (authUser && !isProcessing) {
-      processMember();
-    }
-  }, [authUser, processMember, isProcessing]);
+    const processMember = async () => {
+      try {
+        setIsProcessing(true);
+        addDebugLog('멤버 처리 시작...');
+
+        // localStorage에 저장
+        localStorage.setItem('id', authUser.id);
+        localStorage.setItem('nickname', authUser.name);
+
+        // 항상 그룹 선택 페이지로 리다이렉션
+        addDebugLog('그룹 선택 페이지로 이동');
+        router.push('/groups');
+      } catch (error) {
+        console.error('Error processing member:', error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : '처리 중 오류가 발생했습니다.';
+        addDebugLog(`멤버 처리 실패: ${errorMessage}`);
+        setError(errorMessage);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    processMember();
+  }, [authUser, isProcessing, router]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 bg-gray-50">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Praygram</h1>
-          <p className="text-gray-600">기도 모임을 위한 온라인 커뮤니티</p>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-md fade-in">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <PraygramLogo size="xl" className="mx-auto mb-6" />
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Praygram</h1>
+          <p className="text-lg text-gray-600">
+            기도 모임을 위한 온라인 커뮤니티
+          </p>
         </div>
 
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          {/* 디버그 로그 (개발 모드에서만) */}
+        <div className="glass-card p-8 rounded-3xl">
+          {/* Debug Log (Development Only) */}
           {process.env.NODE_ENV === 'development' && debugLog.length > 0 && (
-            <div className="mb-4 p-3 bg-gray-50 border rounded-md text-xs">
+            <div className="mb-6 p-4 rounded-2xl bg-gray-50/80 border border-gray-200/50">
               <details>
-                <summary className="cursor-pointer font-medium">
+                <summary className="cursor-pointer font-medium text-gray-700 hover:text-gray-900">
                   디버그 로그
                 </summary>
-                <div className="mt-2 space-y-1">
+                <div className="mt-3 space-y-1 max-h-40 overflow-y-auto">
                   {debugLog.slice(-10).map((log, index) => (
-                    <div key={index} className="text-gray-600">
+                    <div
+                      key={index}
+                      className="text-xs text-gray-600 font-mono"
+                    >
                       {log}
                     </div>
                   ))}
@@ -198,61 +179,89 @@ export default function AuthPage() {
             </div>
           )}
 
+          {/* Error Message */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-800">{error}</p>
-              <button
-                onClick={() => {
-                  setError(null);
-                  setDebugLog([]);
-                }}
-                className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
-              >
-                다시 시도
-              </button>
+            <div className="mb-6 p-4 rounded-2xl bg-red-50/80 border border-red-200/50">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-red-600 text-sm">⚠️</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-red-800 font-medium">{error}</p>
+                  <button
+                    onClick={() => {
+                      setError(null);
+                      setDebugLog([]);
+                    }}
+                    className="mt-2 text-sm text-red-600 hover:text-red-800 underline font-medium"
+                  >
+                    다시 시도
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
+          {/* Auth Content */}
           {authUser ? (
-            <div className="text-center">
-              <p className="text-gray-700 mb-4">
+            <div className="text-center slide-up">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                <span className="text-2xl">✓</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
                 안녕하세요, {authUser.name}님!
-              </p>
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-              <p className="text-sm text-gray-500 mt-4">
-                {isProcessing ? '계정 설정 중...' : '로그인 처리 중...'}
-              </p>
+              </h3>
+              <div className="flex items-center justify-center space-x-2 mb-4">
+                <LoadingSpinner />
+                <span className="text-gray-600 font-medium">
+                  {isProcessing ? '계정 설정 중...' : '로그인 처리 중...'}
+                </span>
+              </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <button
                 onClick={loginWithKakao}
                 disabled={isProcessing}
-                className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-md shadow-sm bg-yellow-400 text-gray-900 font-medium hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full glass-button flex items-center justify-center px-6 py-4 rounded-2xl font-semibold text-gray-900 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: 'linear-gradient(135deg, #FEE500, #FFEB3B)',
+                  border: '1px solid rgba(254, 229, 0, 0.3)',
+                }}
               >
                 {isProcessing ? (
                   <>
-                    <LoadingSpinner className="w-5 h-5 mr-3" />
-                    <span>로그인 중...</span>
+                    <LoadingSpinner />
+                    <span className="ml-3">로그인 중...</span>
                   </>
                 ) : (
                   <>
                     <Image
                       src="/kakao_login.png"
                       alt="카카오 로그인"
-                      width={20}
-                      height={20}
+                      width={24}
+                      height={24}
                       className="mr-3"
                     />
                     <span>카카오로 시작하기</span>
                   </>
                 )}
               </button>
-              <p className="text-xs text-gray-500 text-center">
-                로그인하여 기도 모임에 참여하세요
-              </p>
+
+              <div className="text-center">
+                <p className="text-sm text-gray-500">
+                  로그인하여 기도 모임에 참여하세요
+                </p>
+              </div>
             </div>
           )}
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-sm text-gray-500">
+            함께 기도하고, 서로 격려하는 온라인 기도 공간
+          </p>
         </div>
       </div>
     </div>

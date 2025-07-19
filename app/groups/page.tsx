@@ -8,6 +8,7 @@ import {
   joinGroupByInviteCode,
 } from '@/apis/groups';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 interface Group {
   id: string;
@@ -51,7 +52,6 @@ export default function GroupsPage() {
   };
 
   const handleGroupClick = (groupId: string, role: string) => {
-    // 로컬스토리지 업데이트
     localStorage.setItem('group', groupId);
     localStorage.setItem('isManager', role === 'LEADER' ? 'true' : 'false');
     router.push(`/${groupId}`);
@@ -121,72 +121,106 @@ export default function GroupsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner className="w-8 h-8 mx-auto mb-4" />
-          <p className="text-gray-600">그룹 목록을 불러오는 중...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="glass-card p-8 rounded-3xl text-center slide-up">
+          <PraygramLogo size="lg" className="mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">
+            그룹 목록을 불러오는 중...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+    <div className="min-h-screen py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12 fade-in">
+          <PraygramLogo size="xl" className="mx-auto mb-6" />
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
             기도모임 선택
           </h1>
-          <p className="text-gray-600">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             참여하고 싶은 기도모임을 선택하거나 새로 만들어보세요
           </p>
         </div>
 
-        {/* 에러 메시지 */}
+        {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="glass-card border-red-200 bg-red-50/90 p-4 rounded-2xl mb-8 max-w-2xl mx-auto slide-up">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                <span className="text-red-600 text-sm">⚠️</span>
+              </div>
+              <p className="text-red-800 font-medium">{error}</p>
+            </div>
           </div>
         )}
 
-        {/* 내 그룹 목록 */}
+        {/* My Groups */}
         {groups.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="mb-16 fade-in">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
               내 기도모임
             </h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {groups.map((group) => {
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {groups.map((group, index) => {
                 const userRole = group.group_members[0]?.role;
                 return (
                   <div
                     key={group.id}
                     onClick={() => handleGroupClick(group.id, userRole)}
-                    className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+                    className="glass-card p-6 rounded-2xl cursor-pointer group slide-up"
+                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">
-                        {group.name}
-                      </h3>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-gray-700 transition-colors truncate">
+                          {group.name}
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {new Date(group.created_at).toLocaleDateString(
+                            'ko-KR'
+                          )}
+                        </p>
+                      </div>
                       <span
-                        className={`px-2 py-1 text-xs rounded-full ${
+                        className={`px-3 py-1 text-xs font-semibold rounded-full ${
                           userRole === 'LEADER'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-white'
+                            : 'bg-gray-100 text-gray-700'
                         }`}
                       >
                         {userRole === 'LEADER' ? '관리자' : '멤버'}
                       </span>
                     </div>
                     {group.description && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                         {group.description}
                       </p>
                     )}
-                    <p className="text-xs text-gray-500">
-                      생성일:{' '}
-                      {new Date(group.created_at).toLocaleDateString('ko-KR')}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 text-gray-500">
+                        <span className="text-sm">👥</span>
+                        <span className="text-sm">멤버</span>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg
+                          className="w-5 h-5 text-gray-700"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 );
               })}
@@ -194,25 +228,38 @@ export default function GroupsPage() {
           </div>
         )}
 
-        {/* 액션 버튼들 */}
-        <div className="grid gap-4 md:grid-cols-2">
-          {/* 새 그룹 생성 */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              새 기도모임 만들기
-            </h3>
+        {/* Action Cards */}
+        <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
+          {/* Create Group */}
+          <div className="glass-card p-8 rounded-3xl slide-up">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center shadow-lg border border-white/50">
+                <svg
+                  className="w-8 h-8 text-gray-700"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                새 기도모임 만들기
+              </h3>
+              <p className="text-gray-600">나만의 기도모임을 시작해보세요</p>
+            </div>
+
             {showCreateForm ? (
-              <div className="space-y-4">
+              <div className="space-y-4 slide-up">
                 <input
                   type="text"
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
                   placeholder="기도모임 이름을 입력하세요"
-                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="glass-input w-full px-4 py-3 rounded-xl font-medium"
                   maxLength={100}
                   disabled={isActionLoading}
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={() => {
                       setShowCreateForm(false);
@@ -220,14 +267,14 @@ export default function GroupsPage() {
                       setError('');
                     }}
                     disabled={isActionLoading}
-                    className="flex-1 py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    className="glass-button flex-1 py-3 px-4 rounded-xl font-medium text-gray-700 disabled:opacity-50"
                   >
                     취소
                   </button>
                   <button
                     onClick={handleCreateGroup}
                     disabled={isActionLoading || !newGroupName.trim()}
-                    className="flex-1 py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="success-button flex-1 py-3 px-4 rounded-xl font-medium text-white disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isActionLoading && <LoadingSpinner />}
                     {isActionLoading ? '생성 중...' : '생성하기'}
@@ -237,38 +284,51 @@ export default function GroupsPage() {
             ) : (
               <button
                 onClick={() => setShowCreateForm(true)}
-                className="w-full py-3 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                className="success-button w-full py-4 px-6 rounded-xl font-semibold text-white"
               >
                 새 기도모임 만들기
               </button>
             )}
           </div>
 
-          {/* 기존 그룹 참여 */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              기도모임 참여하기
-            </h3>
+          {/* Join Group */}
+          <div className="glass-card p-8 rounded-3xl slide-up">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center shadow-lg border border-white/50">
+                <svg
+                  className="w-8 h-8 text-gray-700"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                기도모임 참여하기
+              </h3>
+              <p className="text-gray-600">초대받은 기도모임에 참여하세요</p>
+            </div>
+
             {showJoinForm ? (
-              <div className="space-y-4">
+              <div className="space-y-4 slide-up">
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value)}
                     placeholder="초대 코드를 입력하세요"
-                    className="flex-1 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="glass-input flex-1 px-4 py-3 rounded-xl font-medium"
                     disabled={isActionLoading}
                   />
                   <button
                     onClick={handlePasteClick}
                     disabled={isActionLoading}
-                    className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
+                    className="glass-button px-4 py-3 rounded-xl text-sm font-medium text-gray-700 disabled:opacity-50"
                   >
-                    붙여넣기
+                    📋
                   </button>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={() => {
                       setShowJoinForm(false);
@@ -276,14 +336,14 @@ export default function GroupsPage() {
                       setError('');
                     }}
                     disabled={isActionLoading}
-                    className="flex-1 py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    className="glass-button flex-1 py-3 px-4 rounded-xl font-medium text-gray-700 disabled:opacity-50"
                   >
                     취소
                   </button>
                   <button
                     onClick={handleJoinGroup}
                     disabled={isActionLoading || !inviteCode.trim()}
-                    className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="primary-button flex-1 py-3 px-4 rounded-xl font-medium text-white disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isActionLoading && <LoadingSpinner />}
                     {isActionLoading ? '참여 중...' : '참여하기'}
@@ -293,7 +353,7 @@ export default function GroupsPage() {
             ) : (
               <button
                 onClick={() => setShowJoinForm(true)}
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className="primary-button w-full py-4 px-6 rounded-xl font-semibold text-white"
               >
                 기도모임 참여하기
               </button>
@@ -301,14 +361,14 @@ export default function GroupsPage() {
           </div>
         </div>
 
-        {/* 빈 상태 메시지 */}
+        {/* Empty State */}
         {groups.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🙏</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="text-center py-16 fade-in">
+            <PraygramLogo size="xl" className="mx-auto mb-6" />
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
               아직 참여한 기도모임이 없습니다
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 text-lg max-w-md mx-auto">
               새로운 기도모임을 만들거나 기존 모임에 참여해보세요
             </p>
           </div>

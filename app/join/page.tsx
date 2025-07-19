@@ -4,6 +4,7 @@ import { createGroup, joinGroupByInviteCode } from '@/apis/groups';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 export default function JoinPage() {
   const [activeTab, setActiveTab] = useState<'join' | 'create'>('join');
@@ -57,7 +58,7 @@ export default function JoinPage() {
     try {
       const response = await createGroup(groupName.trim());
       if (response) {
-        // 로컬스토리지 업데이트 (생성자는 리더가 됨)
+        // 로컬스토리지 업데이트
         localStorage.setItem('group', response.id);
         localStorage.setItem('isManager', 'true');
 
@@ -83,136 +84,215 @@ export default function JoinPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-6 px-4 bg-gray-50">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold text-center text-gray-900 mb-6">
-          Praygram
-        </h1>
-
-        {/* 탭 메뉴 */}
-        <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
-          <button
-            onClick={() => {
-              setActiveTab('join');
-              setErrorMessage('');
-              setGroupId('');
-            }}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'join'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
+    <div className="min-h-screen py-8 px-4">
+      <div className="max-w-md mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8 fade-in">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center shadow-lg border border-white/50">
+            <PraygramLogo size="md" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             기도모임 참여
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('create');
-              setErrorMessage('');
-              setGroupName('');
-            }}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'create'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            기도모임 생성
-          </button>
+          </h1>
+          <p className="text-gray-600">
+            새로운 기도모임에 참여하거나 직접 만들어보세요
+          </p>
         </div>
 
-        {/* 에러 메시지 */}
+        {/* Tab Navigation */}
+        <div className="glass-card p-2 rounded-2xl mb-6 slide-up">
+          <div className="flex">
+            <button
+              onClick={() => {
+                setActiveTab('join');
+                setErrorMessage('');
+              }}
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
+                activeTab === 'join'
+                  ? 'bg-white text-blue-600 shadow-md'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              모임 참여
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('create');
+                setErrorMessage('');
+              }}
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
+                activeTab === 'create'
+                  ? 'bg-white text-blue-600 shadow-md'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              모임 만들기
+            </button>
+          </div>
+        </div>
+
+        {/* Error Message */}
         {errorMessage && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-800">{errorMessage}</p>
+          <div className="mb-6 p-4 rounded-2xl bg-red-50/80 border border-red-200/50 slide-up">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                <span className="text-red-600 text-sm">⚠️</span>
+              </div>
+              <p className="text-red-800 font-medium">{errorMessage}</p>
+            </div>
           </div>
         )}
 
-        {/* 기도모임 참여 탭 */}
-        {activeTab === 'join' && (
-          <div className="space-y-4">
-            <div>
-              <label
-                className="block text-sm font-medium text-gray-700 mb-2"
-                htmlFor="groupId"
-              >
-                공유받은 기도모임 초대 코드를 입력해주세요
-              </label>
-              <div className="flex gap-2">
+        {/* Content */}
+        <div className="glass-card p-8 rounded-3xl slide-up">
+          {activeTab === 'join' ? (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border border-white/50">
+                  <svg
+                    className="w-6 h-6 text-gray-700"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  기도모임 참여
+                </h2>
+                <p className="text-gray-600 text-sm">
+                  초대 코드를 입력하여 기도모임에 참여하세요
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  초대 코드 *
+                </label>
                 <input
-                  className="flex-1 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
-                  id="groupId"
+                  type="text"
                   value={groupId}
-                  onChange={(e) => {
-                    setGroupId(e.target.value);
-                    setErrorMessage('');
-                  }}
+                  onChange={(e) => setGroupId(e.target.value)}
                   placeholder="초대 코드를 입력하세요"
+                  className="glass-input w-full px-4 py-3 rounded-xl text-gray-900 font-medium placeholder-gray-500"
                   disabled={isLoading}
                 />
-                <button
-                  onClick={handlePasteClick}
-                  className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading}
-                >
-                  붙여넣기
-                </button>
+                <p className="text-xs text-gray-500 mt-2">
+                  기도모임 리더에게 초대 코드를 받아 입력해주세요
+                </p>
               </div>
-            </div>
 
-            <button
-              onClick={handleJoinButtonClick}
-              disabled={isLoading || !groupId.trim()}
-              className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-            >
-              {isLoading && <LoadingSpinner />}
-              {isLoading ? '참여 중...' : '기도모임 참여하기'}
-            </button>
-          </div>
-        )}
-
-        {/* 기도모임 생성 탭 */}
-        {activeTab === 'create' && (
-          <div className="space-y-4">
-            <div>
-              <label
-                className="block text-sm font-medium text-gray-700 mb-2"
-                htmlFor="groupName"
+              <button
+                onClick={handleJoinButtonClick}
+                disabled={isLoading || !groupId.trim()}
+                className="primary-button w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 hover:scale-105"
               >
-                새로운 기도모임 이름을 입력해주세요
-              </label>
-              <input
-                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:text-gray-500"
-                id="groupName"
-                value={groupName}
-                onChange={(e) => {
-                  setGroupName(e.target.value);
-                  setErrorMessage('');
-                }}
-                placeholder="예: 우리 교회 기도모임"
-                maxLength={100}
-                disabled={isLoading}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                생성하시면 자동으로 모임의 관리자가 됩니다.
-              </p>
+                {isLoading && <LoadingSpinner />}
+                <span>{isLoading ? '참여 중...' : '모임 참여하기'}</span>
+              </button>
             </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border border-white/50">
+                  <svg
+                    className="w-6 h-6 text-gray-700"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  새 기도모임 만들기
+                </h2>
+                <p className="text-gray-600 text-sm">
+                  새로운 기도모임을 만들고 다른 분들을 초대하세요
+                </p>
+              </div>
 
-            <button
-              onClick={handleCreateButtonClick}
-              disabled={isLoading || !groupName.trim()}
-              className="w-full py-3 px-4 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-            >
-              {isLoading && <LoadingSpinner />}
-              {isLoading ? '생성 중...' : '기도모임 생성하기'}
-            </button>
-          </div>
-        )}
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  모임 이름 *
+                </label>
+                <input
+                  type="text"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  placeholder="기도모임 이름을 입력하세요"
+                  className="glass-input w-full px-4 py-3 rounded-xl text-gray-900 font-medium placeholder-gray-500"
+                  maxLength={50}
+                  disabled={isLoading}
+                />
+                <div className="mt-2 flex justify-between items-center">
+                  <p className="text-xs text-gray-500">
+                    의미있는 모임 이름을 지어주세요
+                  </p>
+                  <span className="text-xs text-gray-400">
+                    {groupName.length}/50
+                  </span>
+                </div>
+              </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">
-            기도모임에 참여하여 함께 기도해보세요
-          </p>
+              <button
+                onClick={handleCreateButtonClick}
+                disabled={isLoading || !groupName.trim()}
+                className="success-button w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 hover:scale-105"
+              >
+                {isLoading && <LoadingSpinner />}
+                <span>{isLoading ? '생성 중...' : '모임 만들기'}</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Tips */}
+        <div className="mt-8 p-6 rounded-2xl bg-blue-50/80 border border-blue-200/50 fade-in">
+          <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
+            <span className="text-lg mr-2">💡</span>
+            {activeTab === 'join' ? '참여 안내' : '모임 운영 팁'}
+          </h3>
+          {activeTab === 'join' ? (
+            <ul className="space-y-2 text-sm text-blue-800">
+              <li className="flex items-start">
+                <span className="text-blue-600 mr-2">•</span>
+                초대 코드는 기도모임 리더가 제공합니다
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-600 mr-2">•</span>
+                참여 후 기도제목을 자유롭게 나누어보세요
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-600 mr-2">•</span>
+                다른 분들의 기도제목에도 응답해주세요
+              </li>
+            </ul>
+          ) : (
+            <ul className="space-y-2 text-sm text-blue-800">
+              <li className="flex items-start">
+                <span className="text-blue-600 mr-2">•</span>
+                모임 이름은 나중에 변경할 수 있습니다
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-600 mr-2">•</span>
+                생성 후 초대 코드를 통해 멤버를 초대하세요
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-600 mr-2">•</span>
+                정기적인 기도제목 나눔을 격려해주세요
+              </li>
+            </ul>
+          )}
+        </div>
+
+        {/* Back to Groups */}
+        <div className="text-center mt-8">
+          <button
+            onClick={() => router.push('/groups')}
+            className="text-gray-500 hover:text-gray-700 font-medium underline"
+          >
+            그룹 목록으로 돌아가기
+          </button>
         </div>
       </div>
     </div>

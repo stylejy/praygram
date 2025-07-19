@@ -1,12 +1,11 @@
 'use client';
 
-import { getFormattedTime } from '@/lib/timeFormatter';
-import { LiaPrayingHandsSolid } from 'react-icons/lia';
 import { useState, useEffect } from 'react';
 import { addReaction, removeReaction } from '@/apis/reactions';
-import { PrayerWithReactions } from '@/types/prayer';
+import { getFormattedTime } from '@/lib/timeFormatter';
 import { queueOfflineAction, isOnline } from '@/lib/offlineStorage';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
+import { PrayerWithReactions } from '@/types/prayer';
 
 interface Props {
   prayer: PrayerWithReactions & { is_offline?: boolean };
@@ -58,14 +57,12 @@ export default function Praycard(props: Props) {
 
       if (hasReacted) {
         if (isOfflineMode) {
-          // 오프라인: 큐에 저장
           queueOfflineAction({
             type: 'REMOVE_REACTION',
             data: { prayer_id: prayer.id, type: 'pray' },
             groupId: prayer.group_id,
           });
         } else {
-          // 온라인: API 호출
           await removeReaction(prayer.id, 'pray');
         }
 
@@ -73,14 +70,12 @@ export default function Praycard(props: Props) {
         setReactionCount((prev) => Math.max(0, prev - 1));
       } else {
         if (isOfflineMode) {
-          // 오프라인: 큐에 저장
           queueOfflineAction({
             type: 'ADD_REACTION',
             data: { prayer_id: prayer.id, type: 'pray' },
             groupId: prayer.group_id,
           });
         } else {
-          // 온라인: API 호출
           await addReaction(prayer.id, 'pray');
         }
 
@@ -89,115 +84,142 @@ export default function Praycard(props: Props) {
       }
     } catch (error) {
       console.error('리액션 처리 실패:', error);
-
-      if (!isOfflineMode) {
-        // 온라인이지만 실패한 경우 오프라인으로 처리
-        try {
-          if (hasReacted) {
-            queueOfflineAction({
-              type: 'REMOVE_REACTION',
-              data: { prayer_id: prayer.id, type: 'pray' },
-              groupId: prayer.group_id,
-            });
-            setHasReacted(false);
-            setReactionCount((prev) => Math.max(0, prev - 1));
-          } else {
-            queueOfflineAction({
-              type: 'ADD_REACTION',
-              data: { prayer_id: prayer.id, type: 'pray' },
-              groupId: prayer.group_id,
-            });
-            setHasReacted(true);
-            setReactionCount((prev) => prev + 1);
-          }
-        } catch (offlineError) {
-          alert('리액션 처리에 실패했습니다. 다시 시도해주세요.');
-        }
-      } else {
-        alert('오프라인 상태에서 리액션 처리에 실패했습니다.');
-      }
     } finally {
       setIsReacting(false);
     }
   };
 
-  const isReactionDisabled = prayer.is_offline || isReacting;
+  const getFormattedTimeDisplay = (timestamp: string) => {
+    return getFormattedTime(timestamp);
+  };
+
+  const isReactionDisabled = isReacting || prayer.is_offline;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-4 border border-gray-200">
-      {/* 헤더 */}
+    <div className="glass-card p-6 rounded-2xl mb-6 slide-up group">
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-gray-800">
-            {prayer.author?.nickname || '익명'}
-          </span>
-          {prayer.is_offline && (
-            <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
-              동기화 대기중
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+            <span className="text-white font-semibold text-sm">
+              {(prayer.author?.nickname || '익명').charAt(0).toUpperCase()}
             </span>
-          )}
-          {isOfflineMode && !prayer.is_offline && (
-            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-              오프라인
+          </div>
+          <div>
+            <span className="font-semibold text-gray-900">
+              {prayer.author?.nickname || '익명'}
             </span>
-          )}
+            {(prayer.is_offline || isOfflineMode) && (
+              <div className="flex items-center space-x-2 mt-1">
+                {prayer.is_offline && (
+                  <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
+                    <span className="w-2 h-2 bg-orange-500 rounded-full mr-1"></span>
+                    동기화 대기중
+                  </span>
+                )}
+                {isOfflineMode && !prayer.is_offline && (
+                  <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                    <span className="w-2 h-2 bg-gray-500 rounded-full mr-1"></span>
+                    오프라인
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-        <span className="text-xs text-gray-500">
-          {getFormattedTime(prayer.created_at)}
-        </span>
+        <div className="text-right">
+          <span className="text-sm text-gray-500 font-medium">
+            {getFormattedTimeDisplay(prayer.created_at)}
+          </span>
+        </div>
       </div>
 
-      {/* 제목 */}
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        {prayer.title}
-      </h3>
+      {/* Content */}
+      <div className="mb-6">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
+          {prayer.title}
+        </h3>
+        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+          {prayer.content}
+        </p>
+      </div>
 
-      {/* 내용 */}
-      <p className="text-gray-700 text-sm leading-relaxed mb-4">
-        {prayer.content}
-      </p>
-
-      {/* 리액션 버튼 */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+      {/* Action Bar */}
+      <div className="flex items-center justify-between pt-4 border-t border-gray-100/50">
         <button
           onClick={handleReactionClick}
           disabled={isReactionDisabled}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+          className={`glass-button flex items-center space-x-3 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
             isReactionDisabled
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'opacity-50 cursor-not-allowed'
               : hasReacted
-              ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-              : 'bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+              : 'hover:scale-105'
           }`}
         >
           {isReacting ? (
             <>
-              <LoadingSpinner className="w-4 h-4" />
+              <LoadingSpinner />
               <span>처리 중...</span>
             </>
           ) : (
             <>
-              <span className="text-lg">🙏</span>
-              <span>{hasReacted ? '기도했습니다' : '기도하기'}</span>
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                  hasReacted
+                    ? 'bg-white/20'
+                    : 'bg-gradient-to-br from-blue-500 to-purple-600'
+                }`}
+              >
+                <span
+                  className={`text-lg ${
+                    hasReacted ? 'text-white' : 'text-white'
+                  }`}
+                >
+                  🙏
+                </span>
+              </div>
+              <span className={hasReacted ? 'text-white' : 'text-gray-700'}>
+                {hasReacted ? '기도했습니다' : '기도하기'}
+              </span>
             </>
           )}
-          <span
-            className={`ml-1 ${hasReacted ? 'text-blue-600' : 'text-gray-500'}`}
-          >
-            {reactionCount}
-          </span>
         </button>
 
-        <div className="flex items-center space-x-1 text-sm text-gray-500">
-          <LiaPrayingHandsSolid size={16} />
-          <span>{reactionCount}명이 기도했습니다</span>
+        <div className="flex items-center space-x-2 text-gray-600">
+          <div className="flex -space-x-1">
+            {Array.from({ length: Math.min(reactionCount, 3) }).map((_, i) => (
+              <div
+                key={i}
+                className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 border-2 border-white flex items-center justify-center"
+              >
+                <span className="text-xs text-white">🙏</span>
+              </div>
+            ))}
+            {reactionCount > 3 && (
+              <div className="w-6 h-6 rounded-full bg-gray-400 border-2 border-white flex items-center justify-center">
+                <span className="text-xs text-white font-bold">+</span>
+              </div>
+            )}
+          </div>
+          <span className="font-semibold text-sm">
+            {reactionCount}명이 기도했습니다
+          </span>
         </div>
       </div>
 
+      {/* Offline Notice */}
       {prayer.is_offline && (
-        <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
-          이 기도제목은 오프라인에서 작성되었습니다. 온라인 복구 시 자동으로
-          동기화됩니다.
+        <div className="mt-4 glass-card bg-orange-50/90 border-orange-200 p-3 rounded-xl">
+          <div className="flex items-center space-x-2">
+            <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
+              <span className="text-white text-xs">⚠️</span>
+            </div>
+            <p className="text-sm text-orange-800 font-medium">
+              이 기도제목은 오프라인에서 작성되었습니다. 온라인 복구 시 자동으로
+              동기화됩니다.
+            </p>
+          </div>
         </div>
       )}
     </div>

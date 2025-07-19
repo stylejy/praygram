@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRealtimePrayers } from '@/hooks/useRealtimePrayers';
 import { useRealtimeReactions } from '@/hooks/useRealtimeReactions';
 import { createSupabaseBrowserClient } from '@/lib/supabase';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 interface Props {
   params: Promise<{ groupId: string }>;
@@ -34,7 +35,6 @@ export default function GroupHome({ params }: Props) {
 
     const fetchGroupInfo = async () => {
       try {
-        // Supabase 세션에서 토큰 가져오기
         const supabase = createSupabaseBrowserClient();
         const { data: session } = await supabase.auth.getSession();
 
@@ -67,63 +67,128 @@ export default function GroupHome({ params }: Props) {
 
   if (!groupId) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center">
-        <p>로딩 중...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="glass-card p-8 rounded-3xl text-center slide-up">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <div className="loading-spinner"></div>
+          </div>
+          <p className="text-gray-600 font-medium">로딩 중...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center">
-        <p className="text-red-500">
-          데이터를 불러오는 중 오류가 발생했습니다.
-        </p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          다시 시도
-        </button>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="glass-card p-8 rounded-3xl text-center slide-up max-w-md">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+            <span className="text-2xl">⚠️</span>
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            오류가 발생했습니다
+          </h3>
+          <p className="text-gray-600 mb-6">
+            데이터를 불러오는 중 문제가 발생했습니다.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="primary-button px-6 py-3 rounded-xl font-semibold text-white"
+          >
+            다시 시도
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-start px-4">
-      <header>
-        <Navbar groupTitle={groupName} />
-      </header>
+    <div className="min-h-screen pb-24">
+      {/* Navigation */}
+      <Navbar groupTitle={groupName} />
 
-      <main className="w-full max-w-2xl">
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <p>기도제목을 불러오는 중...</p>
-          </div>
-        ) : prayers.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">
-              아직 등록된 기도제목이 없습니다.
-            </p>
-            <p className="text-sm text-gray-400">
-              첫 번째 기도제목을 등록해보세요!
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {prayers.map((prayer) => (
-              <Praycard key={prayer.id} prayer={prayer} />
-            ))}
-          </div>
-        )}
+      {/* Main Content */}
+      <main className="pt-24 px-4">
+        <div className="max-w-2xl mx-auto">
+          {isLoading ? (
+            <div className="space-y-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="glass-card p-6 rounded-2xl slide-up pulse-animation"
+                  style={{ animationDelay: `${i * 0.1}s` }}
+                >
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div className="space-y-2 flex-1">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/3"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-1/4"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-2 mb-4">
+                    <div className="h-5 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></div>
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div className="h-10 bg-gray-200 rounded-xl animate-pulse w-32"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : prayers.length === 0 ? (
+            <div className="text-center py-20 fade-in">
+              <PraygramLogo size="xl" className="mx-auto mb-6" />
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                아직 등록된 기도제목이 없습니다
+              </h3>
+              <p className="text-gray-600 text-lg mb-8 max-w-md mx-auto">
+                첫 번째 기도제목을 등록하여 기도모임을 시작해보세요!
+              </p>
+              <Link
+                href={`/${groupId}/add`}
+                className="primary-button inline-flex items-center space-x-3 px-8 py-4 rounded-2xl font-semibold text-white"
+              >
+                <span className="text-xl">✨</span>
+                <span>첫 기도제목 등록하기</span>
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-6 fade-in">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-2">
+                  기도제목 목록
+                </h2>
+                <p className="text-gray-600">
+                  총 {prayers.length}개의 기도제목이 있습니다
+                </p>
+              </div>
+
+              {prayers.map((prayer, index) => (
+                <div
+                  key={prayer.id}
+                  className="slide-up"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <Praycard prayer={prayer} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
-      {/* 기도제목 추가 버튼 */}
+      {/* Floating Action Button */}
       <Link
         href={`/${groupId}/add`}
-        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-colors"
+        className="floating-action group"
+        title="새 기도제목 등록"
       >
-        <FaPlus size={24} />
+        <FaPlus
+          size={20}
+          className="text-white group-hover:rotate-90 transition-transform duration-300"
+        />
       </Link>
     </div>
   );

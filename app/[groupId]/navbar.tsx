@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 interface Props {
   groupTitle: string;
@@ -15,23 +15,36 @@ export default function Navbar(props: Props) {
     router.push('/groups');
   };
 
+  const handleHome = () => {
+    router.push('/');
+  };
+
   return (
-    <nav className="fixed inset-x-0 top-6 z-30 mx-4 w-auto bg-white/70 px-10 py-3 shadow-2xl backdrop-blur-lg rounded-3xl">
-      <div className="flex items-center justify-between">
-        <div className="flex shrink-0">
-          <a aria-current="page" className="flex items-center" href="/">
-            <h1 className="text-xl font-extralight text-gray-500">Praygram</h1>
-          </a>
-        </div>
-        <div className="md:flex md:items-center md:justify-center md:gap-5 text-gray-500">
-          <button
-            onClick={handleGroupSwitch}
-            className="flex items-center gap-2 px-3 py-1 rounded-full hover:bg-white/50 transition-colors"
-            title="다른 기도모임으로 전환"
-          >
-            <span>{groupTitle}</span>
+    <nav className="glass-navbar fixed inset-x-0 top-6 z-50 mx-6 rounded-2xl">
+      <div className="flex items-center justify-between px-6 py-4">
+        {/* Logo */}
+        <button
+          onClick={handleHome}
+          className="flex items-center space-x-2 group"
+        >
+          <PraygramLogo size="sm" />
+          <h1 className="text-xl font-semibold text-gray-900 group-hover:text-gray-700 transition-all duration-300">
+            Praygram
+          </h1>
+        </button>
+
+        {/* Group Selector */}
+        <button
+          onClick={handleGroupSwitch}
+          className="glass-button flex items-center space-x-3 px-4 py-2 rounded-xl hover:scale-105 transition-all duration-200"
+          title="다른 기도모임으로 전환"
+        >
+          <span className="font-medium text-gray-700 max-w-32 truncate">
+            {groupTitle}
+          </span>
+          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-200/50">
             <svg
-              className="w-4 h-4"
+              className="w-3 h-3 text-gray-600 transition-transform duration-200 group-hover:rotate-180"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -43,8 +56,8 @@ export default function Navbar(props: Props) {
                 d="M19 9l-7 7-7-7"
               />
             </svg>
-          </button>
-        </div>
+          </div>
+        </button>
       </div>
     </nav>
   );

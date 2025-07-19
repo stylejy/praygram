@@ -82,24 +82,25 @@ export default function AddPrayer({ params }: Props) {
         mutate(`/api/prayers?groupId=${groupId}`);
       }
 
-      // 성공 시 그룹 홈으로 이동
-      router.push(`/${groupId}`);
+      // 성공 시 이전 페이지로 이동
+      router.back();
     } catch (error) {
       console.error('기도제목 등록 실패:', error);
 
-      if (isOfflineMode) {
-        alert('오프라인 저장에 실패했습니다. 다시 시도해주세요.');
-      } else {
-        // 온라인이지만 API 실패 시 오프라인으로 저장
+      if (!isOfflineMode) {
+        // 온라인이지만 실패한 경우 오프라인으로 처리
         try {
           saveOfflinePrayer(prayerData);
+          mutate(`/api/prayers?groupId=${groupId}`);
           alert(
-            '서버 연결에 실패했습니다. 기도제목이 임시 저장되었으며, 나중에 자동으로 동기화됩니다.'
+            '네트워크 오류로 임시 저장되었습니다. 온라인 복구 시 자동으로 동기화됩니다.'
           );
-          router.push(`/${groupId}`);
+          router.back();
         } catch (offlineError) {
           alert('기도제목 등록에 실패했습니다. 다시 시도해주세요.');
         }
+      } else {
+        alert('오프라인 상태에서 저장에 실패했습니다.');
       }
     } finally {
       setIsSubmitting(false);
@@ -108,105 +109,169 @@ export default function AddPrayer({ params }: Props) {
 
   if (!groupId) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>로딩 중...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="glass-card p-8 rounded-3xl text-center slide-up">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <LoadingSpinner />
+          </div>
+          <p className="text-gray-600 font-medium">로딩 중...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold text-gray-800">
-            기도제목 등록
+    <div className="min-h-screen py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8 fade-in">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center shadow-lg border border-white/50">
+            <svg
+              className="w-8 h-8 text-gray-700"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            새 기도제목 등록
             {isOfflineMode && (
-              <span className="ml-2 text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded">
+              <span className="ml-3 inline-flex items-center px-3 py-1 text-sm font-medium bg-orange-100 text-orange-800 rounded-full">
+                <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
                 오프라인
               </span>
             )}
           </h1>
-          <button
-            onClick={() => router.back()}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
+          <p className="text-gray-600">마음을 담아 기도제목을 작성해보세요</p>
         </div>
 
+        {/* Offline Notice */}
         {isOfflineMode && (
-          <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-md">
-            <p className="text-sm text-orange-800">
-              현재 오프라인 상태입니다. 기도제목이 임시 저장되며, 온라인 복구 시
-              자동으로 동기화됩니다.
-            </p>
+          <div className="mb-6 p-4 rounded-2xl bg-orange-50/80 border border-orange-200/50 slide-up">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
+                <span className="text-white text-sm">⚠️</span>
+              </div>
+              <div>
+                <h3 className="font-semibold text-orange-900 mb-1">
+                  오프라인 모드
+                </h3>
+                <p className="text-sm text-orange-800">
+                  현재 오프라인 상태입니다. 기도제목이 임시 저장되며, 온라인
+                  복구 시 자동으로 동기화됩니다.
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              제목
-            </label>
-            <input
-              id="title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="기도제목을 간단히 입력해주세요"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              maxLength={100}
-              disabled={isSubmitting}
-            />
-            <p className="text-xs text-gray-500 mt-1">{title.length}/100</p>
-          </div>
+        {/* Form */}
+        <div className="glass-card p-8 rounded-3xl slide-up">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Title Input */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3">
+                기도제목 *
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="기도제목을 입력하세요 (최대 100자)"
+                className="glass-input w-full px-4 py-3 rounded-xl text-gray-900 font-medium placeholder-gray-500"
+                maxLength={100}
+                disabled={isSubmitting}
+                required
+              />
+              <div className="mt-2 flex justify-between items-center">
+                <p className="text-xs text-gray-500">
+                  간단하고 명확하게 작성해주세요
+                </p>
+                <span className="text-xs text-gray-400">
+                  {title.length}/100
+                </span>
+              </div>
+            </div>
 
-          <div>
-            <label
-              htmlFor="content"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              내용
-            </label>
-            <textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="기도제목에 대한 자세한 내용을 입력해주세요"
-              rows={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              maxLength={500}
-              disabled={isSubmitting}
-            />
-            <p className="text-xs text-gray-500 mt-1">{content.length}/500</p>
-          </div>
+            {/* Content Input */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3">
+                상세 내용 *
+              </label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="구체적인 기도 요청사항을 작성해주세요 (최대 500자)"
+                className="glass-input w-full px-4 py-4 rounded-xl text-gray-900 resize-none font-medium placeholder-gray-500"
+                rows={6}
+                maxLength={500}
+                disabled={isSubmitting}
+                required
+              />
+              <div className="mt-2 flex justify-between items-center">
+                <p className="text-xs text-gray-500">
+                  기도가 필요한 상황을 자세히 설명해주세요
+                </p>
+                <span className="text-xs text-gray-400">
+                  {content.length}/500
+                </span>
+              </div>
+            </div>
 
-          <div className="flex space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="flex-1 py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-              disabled={isSubmitting}
-            >
-              취소
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              disabled={isSubmitting || !title.trim() || !content.trim()}
-            >
-              {isSubmitting && <LoadingSpinner />}
-              {isSubmitting
-                ? '처리 중...'
-                : isOfflineMode
-                ? '임시 저장'
-                : '등록하기'}
-            </button>
-          </div>
-        </form>
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-4">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="glass-button flex-1 py-3 px-4 rounded-xl font-semibold text-gray-700 hover:scale-105 transition-all duration-200 disabled:opacity-50"
+                disabled={isSubmitting}
+              >
+                취소
+              </button>
+              <button
+                type="submit"
+                className={`flex-1 py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${
+                  isOfflineMode
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-lg hover:shadow-xl'
+                    : 'primary-button hover:scale-105'
+                }`}
+                disabled={isSubmitting || !title.trim() || !content.trim()}
+              >
+                {isSubmitting && <LoadingSpinner />}
+                <span>
+                  {isSubmitting
+                    ? '등록 중...'
+                    : isOfflineMode
+                    ? '임시 저장'
+                    : '등록하기'}
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Tips */}
+        <div className="mt-8 p-6 rounded-2xl bg-blue-50/80 border border-blue-200/50 fade-in">
+          <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
+            <span className="text-lg mr-2">💡</span>
+            기도제목 작성 팁
+          </h3>
+          <ul className="space-y-2 text-sm text-blue-800">
+            <li className="flex items-start">
+              <span className="text-blue-600 mr-2">•</span>
+              구체적이고 명확한 상황을 설명해주세요
+            </li>
+            <li className="flex items-start">
+              <span className="text-blue-600 mr-2">•</span>
+              개인정보는 적절히 보호하면서 작성해주세요
+            </li>
+            <li className="flex items-start">
+              <span className="text-blue-600 mr-2">•</span>
+              감사나 찬양의 내용도 함께 나누어보세요
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
