@@ -56,7 +56,15 @@ export const createGroup = async (
     throw new Error(error.error?.message || 'Failed to create group');
   }
 
-  return response.json();
+  const data = await response.json();
+
+  // API 응답 형식을 CreateGroupResponse로 변환
+  return {
+    id: data.group.id,
+    name: data.group.name,
+    inviteCode: data.group.invite_code,
+    createdAt: data.group.created_at,
+  };
 };
 
 export const joinGroupByInviteCode = async (
