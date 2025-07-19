@@ -2,10 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* iOS Safe Area Support */
-html {
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
+/* iOS Safe Area Support - Only for specific elements */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
 }
 
 /* Color Palette - Sleek Grayscale with Accent Colors */
