@@ -143,7 +143,7 @@ export const getUserGroups = async (): Promise<GetUserGroupsResponse> => {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch('/api/groups/user', {
+  const response = await fetch('/api/groups', {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${session.session.access_token}`,
