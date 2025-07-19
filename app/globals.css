@@ -164,7 +164,7 @@ body {
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.3),
+      rgba(156, 163, 175, 0.4),
       transparent
     );
     transition: left 0.5s;
