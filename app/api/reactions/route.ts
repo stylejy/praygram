@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       throw new ApiError(403, 'You are not a member of this group');
     }
 
-    // 리액션 추가 (UNIQUE 제약조건으로 중복 방지)
+    // 리액션 추가 (여러 번 기도 가능)
     const { data: reaction, error } = await supabase
       .from('reactions')
       .insert([
@@ -60,10 +60,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      // 중복 리액션인 경우
-      if (error.code === '23505') {
-        throw new ApiError(409, 'You have already reacted to this prayer');
-      }
       console.error('Reaction creation error:', error);
       throw new ApiError(500, 'Failed to add reaction');
     }

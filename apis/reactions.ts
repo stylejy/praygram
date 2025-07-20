@@ -39,9 +39,6 @@ export async function addReaction(
   });
 
   if (!response.ok) {
-    if (response.status === 409) {
-      throw new Error('이미 기도했습니다');
-    }
     if (response.status === 401) {
       throw new Error('로그인이 필요합니다');
     }

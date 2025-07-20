@@ -18,10 +18,12 @@ export default function Praycard(props: Props) {
   const [reactionCount, setReactionCount] = useState(
     prayer.reaction_count || 0
   );
-  const [hasReacted, setHasReacted] = useState(false);
+
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [isMyPrayer, setIsMyPrayer] = useState(false);
+  const [hasEverPrayed, setHasEverPrayed] = useState(false);
+  const [showPrayEffect, setShowPrayEffect] = useState(false);
 
   // 현재 사용자 ID 가져오기 (Supabase Auth에서)
   useEffect(() => {
@@ -47,14 +49,6 @@ export default function Praycard(props: Props) {
 
           // 내 기도 카드인지 확인
           setIsMyPrayer(user.id === prayer.author_id);
-
-          // 현재 사용자가 이미 리액션했는지 확인
-          if (prayer.reactions) {
-            const userReaction = prayer.reactions.find(
-              (r) => r.user_id === user.id
-            );
-            setHasReacted(!!userReaction);
-          }
         } else {
           console.error('사용자 정보를 가져올 수 없습니다:', error);
           setCurrentUserId(null);
@@ -92,33 +86,24 @@ export default function Praycard(props: Props) {
     try {
       setIsReacting(true);
 
-      if (hasReacted) {
-        if (isOfflineMode) {
-          queueOfflineAction({
-            type: 'REMOVE_REACTION',
-            data: { prayer_id: prayer.id, type: 'pray' },
-            groupId: prayer.group_id,
-          });
-        } else {
-          await removeReaction(prayer.id, 'pray');
-        }
+      // 기도 이펙트 표시
+      setShowPrayEffect(true);
+      setTimeout(() => setShowPrayEffect(false), 2000);
 
-        setHasReacted(false);
-        setReactionCount((prev) => Math.max(0, prev - 1));
+      // 항상 기도 추가 (토글하지 않음)
+      if (isOfflineMode) {
+        queueOfflineAction({
+          type: 'ADD_REACTION',
+          data: { prayer_id: prayer.id, type: 'pray' },
+          groupId: prayer.group_id,
+        });
       } else {
-        if (isOfflineMode) {
-          queueOfflineAction({
-            type: 'ADD_REACTION',
-            data: { prayer_id: prayer.id, type: 'pray' },
-            groupId: prayer.group_id,
-          });
-        } else {
-          await addReaction(prayer.id, 'pray');
-        }
-
-        setHasReacted(true);
-        setReactionCount((prev) => prev + 1);
+        await addReaction(prayer.id, 'pray');
       }
+
+      // 기도 카운트 증가 및 상태 업데이트
+      setReactionCount((prev) => prev + 1);
+      setHasEverPrayed(true);
     } catch (error) {
       console.error('리액션 처리 실패:', error);
     } finally {
@@ -192,8 +177,6 @@ export default function Praycard(props: Props) {
             className={`glass-button flex items-center space-x-3 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
               isReactionDisabled
                 ? 'opacity-50 cursor-not-allowed'
-                : hasReacted
-                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                 : 'hover:scale-105'
             }`}
           >
@@ -205,30 +188,15 @@ export default function Praycard(props: Props) {
             ) : (
               <>
                 <span className="text-lg">🙏</span>
-                <span className={hasReacted ? 'text-white' : 'text-gray-700'}>
-                  {hasReacted ? '기도했습니다' : '기도하기'}
+                <span className="text-gray-700">
+                  {hasEverPrayed ? '또 기도합니다' : '기도하기'}
                 </span>
               </>
             )}
           </button>
         )}
 
-        <div className="flex items-center space-x-2 text-gray-600">
-          <div className="flex -space-x-1">
-            {Array.from({ length: Math.min(reactionCount, 3) }).map((_, i) => (
-              <div
-                key={i}
-                className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 border-2 border-white flex items-center justify-center"
-              >
-                <span className="text-xs text-white">🙏</span>
-              </div>
-            ))}
-            {reactionCount > 3 && (
-              <div className="w-6 h-6 rounded-full bg-gray-400 border-2 border-white flex items-center justify-center">
-                <span className="text-xs text-white font-bold">+</span>
-              </div>
-            )}
-          </div>
+        <div className="flex items-center text-gray-600">
           <span className="font-semibold text-sm">
             {reactionCount}번 기도 받았습니다
           </span>
@@ -253,6 +221,15 @@ export default function Praycard(props: Props) {
               이 기도제목은 오프라인에서 작성되었습니다. 온라인 복구 시 자동으로
               동기화됩니다.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* 기도 이펙트 애니메이션 */}
+      {showPrayEffect && (
+        <div className="fixed inset-0 pointer-events-none z-50 flex items-end justify-center pb-20">
+          <div className="animate-pray-effect">
+            <span className="text-6xl">🙏</span>
           </div>
         </div>
       )}

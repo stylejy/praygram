@@ -428,3 +428,31 @@ select:disabled {
     height: 56px;
   }
 }
+
+/* 기도 이펙트 애니메이션 */
+.animate-pray-effect {
+  animation: pray-effect 2s ease-out forwards;
+}
+
+@keyframes pray-effect {
+  0% {
+    transform: translateY(50px) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-20px) scale(1.2);
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(-30px) scale(1);
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(-25px) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-40px) scale(0.8);
+    opacity: 0;
+  }
+}
