@@ -222,146 +222,61 @@ export default function AuthPage() {
   }, [authUser, isProcessing, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md fade-in">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <PraygramLogo size="xl" className="mx-auto mb-6" />
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Praygram</h1>
-          <p className="text-lg text-gray-600">
-            기도 모임을 위한 온라인 커뮤니티
-          </p>
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center px-6">
+      <div className="glass-card w-full max-w-sm px-8 py-12 flex flex-col items-center gap-8 fade-in rounded-3xl">
+        <h1 className="text-3xl font-light tracking-tight text-gray-900">
+          Praygram
+        </h1>
 
-        <div className="glass-card p-8 rounded-3xl">
-          {/* Debug Log (Development Only) */}
-          {process.env.NODE_ENV === 'development' && debugLog.length > 0 && (
-            <div className="mb-6 p-4 rounded-2xl bg-gray-50/80 border border-gray-200/50">
-              <details>
-                <summary className="cursor-pointer font-medium text-gray-700 hover:text-gray-900">
-                  디버그 로그
-                </summary>
-                <div className="mt-3 space-y-1 max-h-40 overflow-y-auto">
-                  {debugLog.slice(-10).map((log, index) => (
-                    <div
-                      key={index}
-                      className="text-xs text-gray-600 font-mono"
-                    >
-                      {log}
-                    </div>
-                  ))}
-                </div>
-              </details>
-            </div>
-          )}
+        {authUser ? (
+          <div className="flex flex-col items-center gap-4">
+            <h2 className="text-xl font-medium text-center leading-relaxed text-gray-900">
+              {authUser.name}님 <br /> 환영합니다!
+            </h2>
+            <p className="text-sm text-gray-500">잠시 후 이동합니다</p>
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-4 w-full">
+            <p className="text-sm text-center text-gray-500">같이 기도하는 공간</p>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-red-50/80 border border-red-200/50">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-red-600 text-sm">⚠️</span>
-                </div>
-                <div className="flex-1">
-                  <p className="text-red-800 font-medium mb-2">{error}</p>
+            {error && (
+              <p className="text-sm text-center text-red-500 leading-relaxed">
+                {error}{' '}
+                <button
+                  onClick={() => { setError(null); setDebugLog([]); }}
+                  className="underline"
+                >
+                  다시 시도
+                </button>
+              </p>
+            )}
 
-                  {/* 모바일 크롬 사용자를 위한 추가 안내 */}
-                  <div className="text-sm text-red-700 space-y-1">
-                    <p className="font-medium">모바일에서 문제가 발생한다면:</p>
-                    <ul className="list-disc list-inside space-y-1 text-xs">
-                      <li>
-                        크롬 설정 → 고급 → 사이트 설정 → 쿠키에서 &apos;모든
-                        쿠키 허용&apos;
-                      </li>
-                      <li>
-                        크롬 설정 → 고급 → 사이트 설정 → 팝업 및 리디렉션 허용
-                      </li>
-                      <li>시크릿 모드에서 시도해보기</li>
-                      <li>브라우저 캐시 및 쿠키 삭제 후 재시도</li>
-                    </ul>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setError(null);
-                      setDebugLog([]);
-                    }}
-                    className="mt-3 text-sm text-red-600 hover:text-red-800 underline font-medium"
-                  >
-                    다시 시도
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Auth Content */}
-          {authUser ? (
-            <div className="text-center slide-up">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                <span className="text-2xl">✓</span>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                안녕하세요, {authUser.name}님!
-              </h3>
-              <div className="flex items-center justify-center space-x-2 mb-4">
-                <LoadingSpinner />
-                <span className="text-gray-600 font-medium">
-                  {isProcessing ? '계정 설정 중...' : '로그인 처리 중...'}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <button
-                onClick={loginWithKakao}
-                disabled={isProcessing}
-                className="w-full glass-button flex items-center justify-center px-6 py-4 rounded-2xl font-semibold text-gray-900 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: 'linear-gradient(135deg, #FEE500, #FFEB3B)',
-                  border: '1px solid rgba(254, 229, 0, 0.3)',
-                }}
-              >
-                {isProcessing ? (
-                  <>
-                    <LoadingSpinner />
-                    <span className="ml-3">로그인 중...</span>
-                  </>
-                ) : (
-                  <>
-                    {/* Kakao Talk Symbol */}
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className="mr-3"
-                    >
-                      <path
-                        d="M12 3C7.03 3 3 6.58 3 10.95c0 2.84 1.88 5.34 4.68 6.84l-.9 3.3c-.08.3.22.53.49.38L10.9 19c.36.03.73.05 1.1.05 4.97 0 9-3.58 9-7.95S16.97 3 12 3z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <span>카카오로 시작하기</span>
-                  </>
-                )}
-              </button>
-
-              <div className="text-center">
-                <p className="text-sm text-gray-500">
-                  로그인하여 기도 모임에 참여하세요
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-sm text-gray-500">
-            함께 기도하고, 서로 격려하는 온라인 기도 공간
-          </p>
-        </div>
+            <button
+              onClick={loginWithKakao}
+              disabled={isProcessing}
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-2xl font-semibold text-gray-900 transition-transform active:scale-95 disabled:opacity-50"
+              style={{ background: '#FEE500' }}
+            >
+              {isProcessing ? (
+                <>
+                  <LoadingSpinner />
+                  <span>로그인 중...</span>
+                </>
+              ) : (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 3C7.03 3 3 6.58 3 10.95c0 2.84 1.88 5.34 4.68 6.84l-.9 3.3c-.08.3.22.53.49.38L10.9 19c.36.03.73.05 1.1.05 4.97 0 9-3.58 9-7.95S16.97 3 12 3z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  <span>카카오로 시작하기</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
