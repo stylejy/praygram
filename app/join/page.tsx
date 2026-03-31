@@ -156,7 +156,7 @@ export default function JoinPage() {
               }}
               className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
                 activeTab === 'join'
-                  ? 'bg-white text-blue-600 shadow-md'
+                  ? 'bg-white text-gray-900 shadow-md'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
@@ -169,7 +169,7 @@ export default function JoinPage() {
               }}
               className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
                 activeTab === 'create'
-                  ? 'bg-white text-blue-600 shadow-md'
+                  ? 'bg-white text-gray-900 shadow-md'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
@@ -312,30 +312,30 @@ export default function JoinPage() {
           {activeTab === 'join' ? (
             <ul className="space-y-2 text-sm text-blue-800">
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2">•</span>
+                <span className="text-gray-900 mr-2">•</span>
                 초대 코드는 기도모임 리더가 제공합니다
               </li>
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2">•</span>
+                <span className="text-gray-900 mr-2">•</span>
                 참여 후 기도제목을 자유롭게 나누어보세요
               </li>
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2">•</span>
+                <span className="text-gray-900 mr-2">•</span>
                 다른 분들의 기도제목에도 응답해주세요
               </li>
             </ul>
           ) : (
             <ul className="space-y-2 text-sm text-blue-800">
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2">•</span>
+                <span className="text-gray-900 mr-2">•</span>
                 모임 이름은 나중에 변경할 수 있습니다
               </li>
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2">•</span>
+                <span className="text-gray-900 mr-2">•</span>
                 생성 후 초대 코드를 통해 멤버를 초대하세요
               </li>
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2">•</span>
+                <span className="text-gray-900 mr-2">•</span>
                 정기적인 기도제목 나눔을 격려해주세요
               </li>
             </ul>

@@ -122,8 +122,8 @@ export default function Praycard(props: Props) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-            <span className="text-white font-semibold text-sm">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center shadow-sm border border-white/60">
+            <span className="text-gray-600 font-semibold text-sm">
               {(prayer.author_name || prayer.author?.nickname || '익명')
                 .charAt(0)
                 .toUpperCase()}

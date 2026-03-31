@@ -220,14 +220,17 @@ body {
   }
 
   .success-button {
-    background: linear-gradient(135deg, var(--success), var(--success-light));
-    color: white;
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
-    border: none;
+    background: rgba(29, 29, 31, 0.82);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: none;
   }
 
   .success-button:hover {
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+    background: rgba(29, 29, 31, 0.92);
+    box-shadow: none;
     transform: translateY(-1px);
   }
 

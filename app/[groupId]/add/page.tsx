@@ -124,7 +124,7 @@ export default function AddPrayer({ params }: Props) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="glass-card p-8 rounded-3xl text-center slide-up">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
             <LoadingSpinner />
           </div>
           <p className="text-gray-600 font-medium">로딩 중...</p>
