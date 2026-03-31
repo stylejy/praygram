@@ -27,47 +27,62 @@ export default function JoinPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-4">
-      <div className="flex flex-col w-auto px-11 items-center justify-center gap-4">
-        <label
-          className="text-gray-500 font-bold text-center"
-          htmlFor="groupId"
+    <div className="flex min-h-screen flex-col items-center justify-center px-6">
+      <div className="animate-fade-in glass-card w-full max-w-sm px-8 py-10 flex flex-col items-center gap-6">
+        <h1
+          className="text-2xl font-medium tracking-tight"
+          style={{ color: 'var(--text-primary)' }}
         >
-          공유받은 기도모임 아이디를 입력해 주세요! <br />
-          (기도모임 아이디를 복사하기 한 다음 오른쪽 붙여넣기 버튼을 누르셔도
-          됩니다)
-        </label>
-        <input
-          className="bg-gray-100 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-          id="groupId"
-          value={groupId}
-          onChange={(e) => {
-            setGroupId(e.target.value);
-            setErrorMessage('');
-          }}
-          placeholder="여기에 입력해 주세요"
-        />
+          기도모임 참여
+        </h1>
+        <p
+          className="text-sm text-center leading-relaxed"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          공유받은 기도모임 아이디를 입력하거나
+          <br />
+          클립보드에서 붙여넣기 해주세요
+        </p>
 
-        <button
-          className="shadow w-full bg-slate-400 hover:bg-slate-400 focus:shadow-outline focus:outline-none text-white font-bold rounded"
-          type="button"
-          onClick={() => {
-            navigator.clipboard.readText().then((text) => {
-              setGroupId(text);
-            });
-            setErrorMessage('');
-          }}
-        >
-          붙여넣기
-        </button>
-        <button
-          className="shadow w-full bg-gray-500 hover:bg-gray-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded mt-6"
-          type="button"
-          onClick={handleJoinButtonClick}
-        >
-          참여하기
-        </button>
-        <span className="text-red-500">{errorMessage}</span>
+        <div className="flex flex-col w-full gap-3">
+          <input
+            className="glass-input"
+            id="groupId"
+            value={groupId}
+            onChange={(e) => {
+              setGroupId(e.target.value);
+              setErrorMessage('');
+            }}
+            placeholder="기도모임 아이디 입력"
+          />
+
+          <button
+            className="btn-secondary"
+            type="button"
+            onClick={() => {
+              navigator.clipboard.readText().then((text) => {
+                setGroupId(text);
+              });
+              setErrorMessage('');
+            }}
+          >
+            클립보드에서 붙여넣기
+          </button>
+
+          <button
+            className="btn-primary mt-2"
+            type="button"
+            onClick={handleJoinButtonClick}
+          >
+            참여하기
+          </button>
+
+          {errorMessage && (
+            <p className="text-sm text-center mt-1" style={{ color: '#ff3b30' }}>
+              {errorMessage}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

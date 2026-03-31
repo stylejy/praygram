@@ -58,7 +58,7 @@ export default function AuthPage() {
     const { error } = await supabaseBrowserClient.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        redirectTo: process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO, // 기존에 쓰던 redirect URL
+        redirectTo: process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO,
       },
     });
 
@@ -76,25 +76,56 @@ export default function AuthPage() {
   }, [authUser]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-4 p-16">
-      {!authUser && (
-        <button onClick={loginWithKakao}>
-          <Image
-            src="/kakao_login.png"
-            alt="카카오 로그인"
-            width={300}
-            height={70}
-          />
-        </button>
-      )}
-      {authUser && (
-        <>
-          <h1 className="text-3xl font-bold text-center">
-            {authUser?.name}님 <br /> 환영합니다!
-          </h1>
-          <p>잠시 후 홈으로 이동합니다</p>
-        </>
-      )}
+    <div className="flex min-h-screen flex-col items-center justify-center px-6">
+      <div className="animate-fade-in glass-card w-full max-w-sm px-8 py-12 flex flex-col items-center gap-8">
+        <h1
+          className="text-3xl font-light tracking-tight"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Praygram
+        </h1>
+
+        {!authUser && (
+          <div className="flex flex-col items-center gap-4 w-full">
+            <p
+              className="text-sm text-center"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              같이 기도하는 공간
+            </p>
+            <button
+              onClick={loginWithKakao}
+              className="transition-transform active:scale-95"
+            >
+              <Image
+                src="/kakao_login.png"
+                alt="카카오 로그인"
+                width={280}
+                height={65}
+                className="rounded-xl"
+              />
+            </button>
+          </div>
+        )}
+
+        {authUser && (
+          <div className="flex flex-col items-center gap-4">
+            <h2
+              className="text-2xl font-medium text-center leading-relaxed"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {authUser?.name}님 <br /> 환영합니다!
+            </h2>
+            <p
+              className="text-sm"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
+              잠시 후 홈으로 이동합니다
+            </p>
+            <div className="spinner mt-2" />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

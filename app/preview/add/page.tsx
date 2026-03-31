@@ -1,22 +1,9 @@
 'use client';
-import { usePathname } from 'next/navigation';
-import Navbar from '../navbar';
+import Navbar from '../../[groupId]/navbar';
 import { useState } from 'react';
-import { createPrayers } from '@/apis/prayers';
 
-export default function Add() {
-  const pathname = usePathname();
+export default function PreviewAdd() {
   const [prayers, setPrayers] = useState<string>('');
-
-  const handleSubmit = async () => {
-    const groupId = pathname.split('/')[1];
-    const response = await createPrayers(groupId, prayers);
-    if (response) {
-      setTimeout(() => {
-        window.location.href = `/${groupId}`;
-      }, 1500);
-    }
-  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-start px-4">
@@ -44,7 +31,7 @@ export default function Add() {
           <button
             className="btn-primary mt-1"
             type="button"
-            onClick={handleSubmit}
+            onClick={() => alert('기도가 공유되었습니다! (preview)')}
           >
             기도 공유하기
           </button>
