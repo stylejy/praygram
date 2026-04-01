@@ -9,7 +9,14 @@ import {
   isOnline,
 } from '@/lib/offlineStorage';
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    const error = new Error('API request failed');
+    throw error;
+  }
+  return res.json();
+};
 
 export function useRealtimePrayers(groupId: string) {
   const supabase = createBrowserClient(
