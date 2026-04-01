@@ -16,7 +16,7 @@ export default function Navbar(props: Props) {
 
   return (
     <nav
-      className="glass-navbar fixed inset-x-0 z-50 mx-4 flex items-center justify-between px-5 py-3.5 rounded-2xl"
+      className="glass-navbar fixed inset-x-0 z-50 mx-4 flex items-center justify-between px-5 py-3.5 rounded-2xl md:mx-0 md:rounded-none md:px-8 md:top-0"
       style={{ top: 'env(safe-area-inset-top, 0.75rem)' }}
     >
       <button
