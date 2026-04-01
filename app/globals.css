@@ -140,6 +140,12 @@ body {
 
   .glass-button {
     @apply relative overflow-hidden;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
     background: var(--glass-white);
     backdrop-filter: var(--blur-light);
     -webkit-backdrop-filter: var(--blur-light);
@@ -202,9 +208,16 @@ body {
     -webkit-backdrop-filter: var(--blur-medium);
     border: var(--border-glass-light);
     box-shadow: var(--shadow-glass);
+    -webkit-box-align: center;
   }
 
   .primary-button {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
     background: rgba(29, 29, 31, 0.82);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);

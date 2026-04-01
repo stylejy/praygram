@@ -194,7 +194,7 @@ export default function GroupHome({ params }: Props) {
 
       {/* Mobile Bottom Bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2">
-        <div className="glass-navbar rounded-2xl p-3 flex space-x-3">
+        <div className="glass-navbar rounded-2xl p-3 flex items-center space-x-3">
           <div className="relative flex-1">
             <button
               onClick={handleInvite}
