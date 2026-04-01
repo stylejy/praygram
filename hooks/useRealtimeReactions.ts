@@ -14,7 +14,7 @@ interface ReactionPayload {
 export function useRealtimeReactions(groupId: string) {
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
   );
 
   // 실시간 리액션 구독 설정
