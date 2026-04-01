@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Prayers fetch error:', error);
-      throw new ApiError(500, 'Failed to fetch prayers');
+      console.error('Prayers fetch error:', JSON.stringify(error));
+      throw new ApiError(500, `Failed to fetch prayers: ${error.message || error.code || JSON.stringify(error)}`);
     }
 
     // 리액션 카운트 추가
