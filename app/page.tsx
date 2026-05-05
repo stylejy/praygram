@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase';
+import { PraygramLogo } from './components/PraygramLogo';
 
 export default function Home() {
   const router = useRouter();
@@ -36,12 +37,15 @@ export default function Home() {
   }, [router]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-20 p-24">
-      <h1 className="font-thin text-4xl text-stone-600">Praygram</h1>
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-10">
+      <PraygramLogo size="xl" />
+      <h1 className="text-3xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+        Praygram
+      </h1>
       <div role="status">
         <svg
           aria-hidden="true"
-          className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-stone-600"
+          className="h-8 w-8 animate-spin text-[color:var(--primary-soft)] fill-[color:var(--primary)]"
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

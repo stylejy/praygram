@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FaDownload, FaPlus, FaShareAlt, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaTimes } from 'react-icons/fa';
+import { PraygramLogo } from './PraygramLogo';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -107,18 +108,16 @@ export function PWAInstallPrompt() {
     return null;
   }
 
-  const PromptIcon = isIOS ? FaShareAlt : FaDownload;
-
   return (
     <div className="pointer-events-none fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+88px)] z-[60] mx-auto max-w-sm md:bottom-6">
       <div
         role="dialog"
         aria-label="Praygram 앱 설치 안내"
-        className="pointer-events-auto rounded-lg border border-[rgba(115,87,106,0.12)] bg-[rgba(255,254,250,0.96)] p-3 shadow-[0_16px_42px_rgba(51,56,49,0.14)] backdrop-blur-xl slide-up"
+        className="pointer-events-auto rounded-lg border border-[color:var(--accent-border)] bg-[rgba(255,253,248,0.96)] p-3 shadow-[0_16px_42px_rgba(74,57,128,0.14)] backdrop-blur-xl slide-up"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[rgba(115,87,106,0.1)] text-[color:var(--primary)]">
-            <PromptIcon size={15} />
+          <div className="relative shrink-0">
+            <PraygramLogo size="md" />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-[14px] font-semibold leading-5 text-[color:var(--text-primary)]">
@@ -133,14 +132,14 @@ export function PWAInstallPrompt() {
           {isIOS ? (
             <button
               onClick={handleDismiss}
-              className="flex h-9 shrink-0 items-center justify-center rounded-md bg-[color:var(--primary)] px-3 text-[13px] font-semibold text-white shadow-sm transition active:scale-[0.99]"
+              className="primary-button flex h-9 shrink-0 items-center justify-center rounded-md px-3 text-[13px] font-semibold text-white transition active:scale-[0.99]"
             >
               확인
             </button>
           ) : (
             <button
               onClick={handleInstall}
-              className="flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md bg-[color:var(--primary)] px-3 text-[13px] font-semibold text-white shadow-sm transition active:scale-[0.99]"
+              className="primary-button flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-[13px] font-semibold text-white transition active:scale-[0.99]"
             >
               <FaPlus size={11} />
               설치
@@ -148,7 +147,7 @@ export function PWAInstallPrompt() {
           )}
           <button
             onClick={handleDismiss}
-            className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[color:var(--text-muted)] transition hover:bg-[rgba(115,87,106,0.08)] hover:text-[color:var(--text-primary)] active:scale-95"
+            className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[color:var(--text-muted)] transition hover:bg-[rgba(117,98,214,0.1)] hover:text-[color:var(--text-primary)] active:scale-95"
             aria-label="설치 안내 닫기"
           >
             <FaTimes size={13} />

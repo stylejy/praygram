@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 interface AuthUser {
   id: string;
@@ -224,7 +225,8 @@ export default function AuthPage() {
   return (
     <main className="page-shell flex items-center justify-center">
       <section className="content-panel max-w-md px-7 py-10 fade-in">
-        <div className="mb-8">
+        <div className="mb-8 flex flex-col items-center">
+          <PraygramLogo size="xl" className="mb-5" />
           <p className="section-eyebrow text-center">같이 기도하는 공간</p>
           <h1 className="mt-2 text-center text-3xl font-semibold tracking-tight text-[color:var(--text-primary)]">
             Praygram

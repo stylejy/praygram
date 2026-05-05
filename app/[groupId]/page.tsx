@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRealtimePrayers } from '@/hooks/useRealtimePrayers';
 import { useRealtimeReactions } from '@/hooks/useRealtimeReactions';
 import { createSupabaseBrowserClient } from '@/lib/supabase';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 interface Props {
   params: Promise<{ groupId: string }>;
 }
@@ -97,10 +98,8 @@ export default function GroupHome({ params }: Props) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="glass-card p-8 rounded-3xl text-center slide-up">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-            <div className="loading-spinner"></div>
-          </div>
-          <p className="text-gray-500 text-sm">로딩 중...</p>
+          <PraygramLogo size="lg" className="mx-auto mb-4" />
+          <p className="text-sm text-[color:var(--text-muted)]">로딩 중...</p>
         </div>
       </div>
     );
@@ -110,7 +109,7 @@ export default function GroupHome({ params }: Props) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="glass-card p-8 rounded-3xl text-center slide-up max-w-sm mx-4">
-          <p className="text-gray-700 mb-6">데이터를 불러오는 중 문제가 발생했습니다.</p>
+          <p className="mb-6 text-[color:var(--text-secondary)]">데이터를 불러오는 중 문제가 발생했습니다.</p>
           <button
             onClick={() => window.location.reload()}
             className="primary-button px-6 py-3 rounded-xl font-medium text-white"
@@ -132,14 +131,12 @@ export default function GroupHome({ params }: Props) {
         <div className="max-w-2xl mx-auto">
           {isLoading ? (
             <div className="text-center py-20 fade-in">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                <div className="loading-spinner"></div>
-              </div>
-              <p className="text-gray-500 text-sm">기도제목을 불러오는 중...</p>
+              <PraygramLogo size="lg" className="mx-auto mb-4" />
+              <p className="text-sm text-[color:var(--text-muted)]">기도제목을 불러오는 중...</p>
             </div>
           ) : prayers && prayers.length === 0 ? (
             <div className="text-center py-20 fade-in">
-              <p className="text-gray-500 mb-6">아직 등록된 기도제목이 없습니다</p>
+              <p className="mb-6 text-[color:var(--text-muted)]">아직 등록된 기도제목이 없습니다</p>
               <Link
                 href={`/${groupId}/add`}
                 className="primary-button inline-flex items-center space-x-2 px-6 py-3 rounded-2xl font-medium text-white"
@@ -185,10 +182,10 @@ export default function GroupHome({ params }: Props) {
             className="glass-button w-14 h-14 rounded-full flex items-center justify-center"
             title="초대하기"
           >
-            <FaShare size={16} className="text-gray-600" />
+            <FaShare size={16} className="text-[color:var(--text-secondary)]" />
           </button>
           {showCopySuccess && (
-            <div className="absolute bottom-full mb-2 right-0 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap slide-up">
+            <div className="absolute bottom-full mb-2 right-0 rounded-lg bg-[color:var(--text-primary)] px-3 py-2 text-sm text-white whitespace-nowrap slide-up">
               초대 링크 복사됨!
             </div>
           )}
@@ -203,25 +200,25 @@ export default function GroupHome({ params }: Props) {
       </div>
 
       {/* Mobile Bottom Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-50 bg-gradient-to-t from-[rgba(247,245,239,0.96)] via-[rgba(247,245,239,0.82)] to-transparent px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3 md:hidden">
-        <div className="mx-auto flex w-full max-w-2xl items-center gap-2 rounded-lg border border-[rgba(115,87,106,0.12)] bg-[rgba(255,254,250,0.92)] p-1.5 shadow-[0_10px_28px_rgba(51,56,49,0.12)] backdrop-blur-md">
+      <div className="fixed inset-x-0 bottom-0 z-50 bg-gradient-to-t from-[rgba(247,243,237,0.96)] via-[rgba(247,243,237,0.82)] to-transparent px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3 md:hidden">
+        <div className="mx-auto flex w-full max-w-2xl items-center gap-2 rounded-lg border border-[color:var(--accent-border)] bg-[rgba(255,253,248,0.92)] p-1.5 shadow-[0_10px_28px_rgba(74,57,128,0.12)] backdrop-blur-md">
           <div className="relative min-w-0 flex-[0.9]">
             <button
               onClick={handleInvite}
-              className="flex h-10 w-full min-w-0 items-center justify-center gap-1.5 rounded-md border border-[rgba(115,87,106,0.12)] bg-white/75 px-2 text-[13px] font-semibold text-[color:var(--text-secondary)] shadow-sm transition active:scale-[0.99]"
+              className="flex h-10 w-full min-w-0 items-center justify-center gap-1.5 rounded-md border border-[color:var(--accent-border)] bg-white/75 px-2 text-[13px] font-semibold text-[color:var(--text-secondary)] shadow-sm transition active:scale-[0.99]"
             >
               <FaShare size={13} className="shrink-0" />
               <span className="truncate">초대하기</span>
             </button>
             {showCopySuccess && (
-              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap slide-up">
+              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 rounded-lg bg-[color:var(--text-primary)] px-3 py-2 text-sm text-white whitespace-nowrap slide-up">
                 초대 링크 복사됨!
               </div>
             )}
           </div>
           <Link
             href={`/${groupId}/add`}
-            className="flex h-10 min-w-0 flex-[1.1] items-center justify-center gap-1.5 rounded-md bg-[color:var(--primary)] px-2 text-[13px] font-semibold text-white shadow-sm transition active:scale-[0.99]"
+            className="primary-button flex h-10 min-w-0 flex-[1.1] items-center justify-center gap-1.5 rounded-md px-2 text-[13px] font-semibold text-white transition active:scale-[0.99]"
           >
             <FaPlus size={13} className="shrink-0" />
             <span className="truncate">기도제목 등록</span>

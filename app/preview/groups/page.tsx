@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaLink, FaPlus } from 'react-icons/fa';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 const mockGroups = [
   { id: '1', name: '청년부 기도모임', role: 'LEADER', created_at: '2024-01-15' },
@@ -29,11 +30,14 @@ export default function PreviewGroupsPage() {
   return (
     <main className="page-shell flex items-center justify-center">
       <section className="content-panel max-w-md fade-in">
-        <div className="mb-6">
-          <p className="section-eyebrow">기도모임</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[color:var(--text-primary)]">
-            함께 기도할 모임을 선택하세요
-          </h1>
+        <div className="mb-6 flex items-start gap-3">
+          <PraygramLogo size="md" className="mt-0.5" />
+          <div className="min-w-0">
+            <p className="section-eyebrow">Praygram</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+              함께 기도할 모임을 선택하세요
+            </h1>
+          </div>
         </div>
 
         {error && (

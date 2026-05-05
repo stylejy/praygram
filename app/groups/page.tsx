@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getUserGroups, createGroup, joinGroupSmart } from '@/apis/groups';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
 import { FaLink, FaPlus } from 'react-icons/fa';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 interface Group {
   id: string;
@@ -129,11 +130,14 @@ export default function GroupsPage() {
   return (
     <main className="page-shell flex items-center justify-center">
       <section className="content-panel max-w-md fade-in">
-        <div className="mb-6">
-          <p className="section-eyebrow">기도모임</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[color:var(--text-primary)]">
-            함께 기도할 모임을 선택하세요
-          </h1>
+        <div className="mb-6 flex items-start gap-3">
+          <PraygramLogo size="md" className="mt-0.5" />
+          <div className="min-w-0">
+            <p className="section-eyebrow">Praygram</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+              함께 기도할 모임을 선택하세요
+            </h1>
+          </div>
         </div>
 
         {error && (

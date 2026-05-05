@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { FaChevronLeft } from 'react-icons/fa';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 interface Props {
   groupTitle: string;
@@ -25,13 +26,16 @@ export default function Navbar(props: Props) {
         >
           <FaChevronLeft size={13} />
         </button>
-        <div className="ml-12 min-w-0 flex-1">
-          <p className="text-[11px] font-medium leading-4 text-[color:var(--text-muted)]">
-            기도모임
-          </p>
-          <h1 className="truncate text-[17px] font-semibold leading-6 text-[color:var(--text-primary)]">
-            {groupTitle}
-          </h1>
+        <div className="ml-12 flex min-w-0 flex-1 items-center gap-2.5">
+          <PraygramLogo size="sm" />
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold leading-4 text-[color:var(--primary)]">
+              기도모임
+            </p>
+            <h1 className="truncate text-[17px] font-semibold leading-6 text-[color:var(--text-primary)]">
+              {groupTitle}
+            </h1>
+          </div>
         </div>
         <div className="w-9 shrink-0" />
       </div>

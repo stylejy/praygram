@@ -8,6 +8,7 @@ import { LoadingSpinner } from '@/app/components/LoadingSpinner';
 import { PrayerWithReactions } from '@/types/prayer';
 import { createSupabaseBrowserClient } from '@/lib/supabase';
 import { FaRegHeart } from 'react-icons/fa';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 interface Props {
   prayer: PrayerWithReactions & { is_offline?: boolean };
@@ -122,7 +123,7 @@ export default function Praycard(props: Props) {
     <div className="glass-card rounded-lg p-6 slide-up">
       {/* Header */}
       <div className="flex items-center space-x-2.5 mb-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(115,87,106,0.14)] bg-[rgba(115,87,106,0.08)]">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--accent-border)] bg-[color:var(--primary-soft)]">
           <span className="text-xs font-semibold text-[color:var(--primary)]">
             {(prayer.author_name || prayer.author?.nickname || '익명')
               .charAt(0)}
@@ -151,7 +152,7 @@ export default function Praycard(props: Props) {
 
       {/* Action Bar */}
       <div
-        className={`border-t border-[rgba(115,87,106,0.1)] pt-4 ${
+        className={`border-t border-[rgba(117,98,214,0.11)] pt-4 ${
           isMyPrayer ? 'flex justify-end' : 'flex items-center justify-between'
         }`}
       >
@@ -192,9 +193,7 @@ export default function Praycard(props: Props) {
       {/* 기도 이펙트 애니메이션 */}
       {showPrayEffect && (
         <div className="fixed inset-0 pointer-events-none z-50 flex items-end justify-center pb-20">
-          <div className="animate-pray-effect">
-            <span className="text-6xl">🙏</span>
-          </div>
+          <PraygramLogo size="xl" className="animate-pray-effect" />
         </div>
       )}
     </div>

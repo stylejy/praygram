@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { FaChevronLeft } from 'react-icons/fa';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 export default function PreviewAddPage() {
   const [title, setTitle] = useState('');
@@ -25,11 +26,14 @@ export default function PreviewAddPage() {
           >
             <FaChevronLeft size={13} />
           </Link>
-          <div className="ml-12 min-w-0 flex-1">
-            <p className="section-eyebrow">기도제목</p>
-            <h1 className="truncate text-[17px] font-semibold leading-6 text-[color:var(--text-primary)]">
-              새 기도제목 등록
-            </h1>
+          <div className="ml-12 flex min-w-0 flex-1 items-center gap-2.5">
+            <PraygramLogo size="sm" />
+            <div className="min-w-0">
+              <p className="section-eyebrow">기도제목</p>
+              <h1 className="truncate text-[17px] font-semibold leading-6 text-[color:var(--text-primary)]">
+                새 기도제목 등록
+              </h1>
+            </div>
           </div>
         </div>
       </nav>
@@ -39,11 +43,14 @@ export default function PreviewAddPage() {
           onSubmit={handleSubmit}
           className="content-panel max-w-xl space-y-5 fade-in"
         >
-          <div>
-            <p className="section-eyebrow">기도 요청</p>
-            <h2 className="mt-1 text-xl font-semibold text-[color:var(--text-primary)]">
-              함께 나눌 기도제목을 적어주세요
-            </h2>
+          <div className="flex items-start gap-3">
+            <PraygramLogo size="md" className="mt-0.5" />
+            <div className="min-w-0">
+              <p className="section-eyebrow">기도 요청</p>
+              <h2 className="mt-1 text-xl font-semibold text-[color:var(--text-primary)]">
+                함께 나눌 기도제목을 적어주세요
+              </h2>
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">

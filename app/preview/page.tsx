@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { FaChevronLeft, FaPlus, FaRegHeart, FaShareAlt } from 'react-icons/fa';
+import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 const mockPrayers = [
   {
@@ -68,7 +69,7 @@ function MockPraycard({ prayer }: { prayer: (typeof mockPrayers)[0] }) {
     <div className="glass-card rounded-lg p-6 slide-up">
       {/* Author */}
       <div className="flex items-center space-x-2.5 mb-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(115,87,106,0.14)] bg-[rgba(115,87,106,0.08)]">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--accent-border)] bg-[color:var(--primary-soft)]">
           <span className="text-xs font-semibold text-[color:var(--primary)]">
             {prayer.author_name.charAt(0)}
           </span>
@@ -92,7 +93,7 @@ function MockPraycard({ prayer }: { prayer: (typeof mockPrayers)[0] }) {
       </div>
 
       {/* Action Bar */}
-      <div className="flex items-center justify-between border-t border-[rgba(115,87,106,0.1)] pt-4">
+      <div className="flex items-center justify-between border-t border-[rgba(117,98,214,0.11)] pt-4">
         <button
           onClick={handleReaction}
           className="primary-button gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all duration-200"
@@ -107,9 +108,7 @@ function MockPraycard({ prayer }: { prayer: (typeof mockPrayers)[0] }) {
 
       {showPrayEffect && (
         <div className="fixed inset-0 pointer-events-none z-50 flex items-end justify-center pb-20">
-          <div className="animate-pray-effect">
-            <span className="text-6xl">🙏</span>
-          </div>
+          <PraygramLogo size="xl" className="animate-pray-effect" />
         </div>
       )}
     </div>
@@ -136,13 +135,16 @@ export default function PreviewPage() {
           >
             <FaChevronLeft size={13} />
           </Link>
-          <div className="ml-12 min-w-0 flex-1">
-            <p className="text-[11px] font-medium leading-4 text-[color:var(--text-muted)]">
-              기도모임
-            </p>
-            <h1 className="truncate text-[17px] font-semibold leading-6 text-[color:var(--text-primary)]">
-              청년부 기도모임
-            </h1>
+          <div className="ml-12 flex min-w-0 flex-1 items-center gap-2.5">
+            <PraygramLogo size="sm" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold leading-4 text-[color:var(--primary)]">
+                기도모임
+              </p>
+              <h1 className="truncate text-[17px] font-semibold leading-6 text-[color:var(--text-primary)]">
+                청년부 기도모임
+              </h1>
+            </div>
           </div>
           <span className="hidden shrink-0 rounded-full border border-[color:var(--accent-border)] bg-white/70 px-2.5 py-1 text-[11px] font-medium text-[color:var(--text-muted)] sm:inline-flex">
             미리보기
@@ -187,7 +189,7 @@ export default function PreviewPage() {
             <FaShareAlt size={15} />
           </button>
           {showCopySuccess && (
-            <div className="absolute bottom-full mb-2 right-0 bg-gray-800 text-white px-3 py-1.5 rounded-lg text-xs whitespace-nowrap slide-up">
+            <div className="absolute bottom-full mb-2 right-0 rounded-lg bg-[color:var(--text-primary)] px-3 py-1.5 text-xs text-white whitespace-nowrap slide-up">
               초대 링크 복사됨!
             </div>
           )}
@@ -202,25 +204,25 @@ export default function PreviewPage() {
       </div>
 
       {/* Mobile Bottom Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-50 bg-gradient-to-t from-[rgba(247,245,239,0.96)] via-[rgba(247,245,239,0.82)] to-transparent px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3 md:hidden">
-        <div className="mx-auto flex w-full max-w-2xl items-center gap-2 rounded-lg border border-[rgba(115,87,106,0.12)] bg-[rgba(255,254,250,0.92)] p-1.5 shadow-[0_10px_28px_rgba(51,56,49,0.12)] backdrop-blur-md">
+      <div className="fixed inset-x-0 bottom-0 z-50 bg-gradient-to-t from-[rgba(247,243,237,0.96)] via-[rgba(247,243,237,0.82)] to-transparent px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3 md:hidden">
+        <div className="mx-auto flex w-full max-w-2xl items-center gap-2 rounded-lg border border-[color:var(--accent-border)] bg-[rgba(255,253,248,0.92)] p-1.5 shadow-[0_10px_28px_rgba(74,57,128,0.12)] backdrop-blur-md">
           <div className="relative min-w-0 flex-[0.9]">
             <button
               onClick={handleInvite}
-              className="flex h-10 w-full min-w-0 items-center justify-center gap-1.5 rounded-md border border-[rgba(115,87,106,0.12)] bg-white/75 px-2 text-[13px] font-semibold text-[color:var(--text-secondary)] shadow-sm transition active:scale-[0.99]"
+              className="flex h-10 w-full min-w-0 items-center justify-center gap-1.5 rounded-md border border-[color:var(--accent-border)] bg-white/75 px-2 text-[13px] font-semibold text-[color:var(--text-secondary)] shadow-sm transition active:scale-[0.99]"
             >
               <FaShareAlt size={13} className="shrink-0" />
               <span className="truncate">초대하기</span>
             </button>
             {showCopySuccess && (
-              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-3 py-1.5 rounded-lg text-xs whitespace-nowrap slide-up">
+              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 rounded-lg bg-[color:var(--text-primary)] px-3 py-1.5 text-xs text-white whitespace-nowrap slide-up">
                 초대 링크 복사됨!
               </div>
             )}
           </div>
           <Link
             href="/preview/add"
-            className="flex h-10 min-w-0 flex-[1.1] items-center justify-center gap-1.5 rounded-md bg-[color:var(--primary)] px-2 text-center text-[13px] font-semibold text-white shadow-sm transition active:scale-[0.99]"
+            className="primary-button flex h-10 min-w-0 flex-[1.1] items-center justify-center gap-1.5 rounded-md px-2 text-center text-[13px] font-semibold text-white transition active:scale-[0.99]"
           >
             <FaPlus size={13} className="shrink-0" />
             <span className="truncate">기도제목 등록</span>
