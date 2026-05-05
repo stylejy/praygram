@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { PraygramLogo } from './PraygramLogo';
+import { FaDownload, FaPlus, FaShareAlt, FaTimes } from 'react-icons/fa';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -16,6 +16,10 @@ export function PWAInstallPrompt() {
   const [isInStandaloneMode, setIsInStandaloneMode] = useState(false);
 
   useEffect(() => {
+    const shouldPreviewPrompt =
+      process.env.NODE_ENV === 'development' &&
+      new URLSearchParams(window.location.search).has('showPwaPrompt');
+
     // PWA로 실행 중인지 확인
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
@@ -36,13 +40,18 @@ export function PWAInstallPrompt() {
       const daysSinceDismissed =
         (Date.now() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
       // 7일 이내에 거절했으면 표시하지 않음
-      if (daysSinceDismissed < 7) {
+      if (daysSinceDismissed < 7 && !shouldPreviewPrompt) {
         return;
       }
     }
 
     // 이미 PWA로 실행 중이면 표시하지 않음
-    if (isStandalone) {
+    if (isStandalone && !shouldPreviewPrompt) {
+      return;
+    }
+
+    if (shouldPreviewPrompt) {
+      setShowPrompt(true);
       return;
     }
 
@@ -98,145 +107,54 @@ export function PWAInstallPrompt() {
     return null;
   }
 
-  return (
-    <>
-      {/* 배경 오버레이 */}
-      <div
-        className="fixed inset-0 bg-black/50 z-50 animate-fade-in"
-        onClick={handleDismiss}
-      />
+  const PromptIcon = isIOS ? FaShareAlt : FaDownload;
 
-      {/* 설치 프롬프트 다이얼로그 */}
-      <div className="fixed inset-x-4 bottom-4 z-50 max-w-md mx-auto animate-slide-up">
-        <div className="glass-card rounded-lg p-6 shadow-xl">
-          {/* 헤더 */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <PraygramLogo size="sm" />
-              <div>
-                <h3 className="text-lg font-semibold text-[color:var(--text-primary)]">
-                  Praygram 앱으로 설치
-                </h3>
-                <p className="text-sm text-[color:var(--text-secondary)]">
-                  홈 화면에서 빠르게 실행하세요
-                </p>
-              </div>
-            </div>
+  return (
+    <div className="pointer-events-none fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+88px)] z-[60] mx-auto max-w-sm md:bottom-6">
+      <div
+        role="dialog"
+        aria-label="Praygram 앱 설치 안내"
+        className="pointer-events-auto rounded-lg border border-[rgba(115,87,106,0.12)] bg-[rgba(255,254,250,0.96)] p-3 shadow-[0_16px_42px_rgba(51,56,49,0.14)] backdrop-blur-xl slide-up"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[rgba(115,87,106,0.1)] text-[color:var(--primary)]">
+            <PromptIcon size={15} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-[14px] font-semibold leading-5 text-[color:var(--text-primary)]">
+              홈 화면에 추가
+            </h3>
+            <p className="truncate text-[12px] leading-4 text-[color:var(--text-secondary)]">
+              {isIOS
+                ? 'Safari 공유 버튼에서 추가'
+                : '기도제목을 바로 열어보세요.'}
+            </p>
+          </div>
+          {isIOS ? (
             <button
               onClick={handleDismiss}
-              className="quiet-icon-button"
-              aria-label="설치 안내 닫기"
+              className="flex h-9 shrink-0 items-center justify-center rounded-md bg-[color:var(--primary)] px-3 text-[13px] font-semibold text-white shadow-sm transition active:scale-[0.99]"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              확인
             </button>
-          </div>
-
-          {/* 특징 목록 */}
-          <div className="space-y-2 mb-6">
-            <div className="flex items-center space-x-2 text-sm text-[color:var(--text-secondary)]">
-              <span className="font-semibold text-[color:var(--primary)]">✓</span>
-              <span>오프라인에서도 기도제목 확인</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm text-[color:var(--text-secondary)]">
-              <span className="font-semibold text-[color:var(--primary)]">✓</span>
-              <span>빠른 앱 실행 및 알림 수신</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm text-[color:var(--text-secondary)]">
-              <span className="font-semibold text-[color:var(--primary)]">✓</span>
-              <span>홈 화면에서 바로 접근</span>
-            </div>
-          </div>
-
-          {/* 버튼 */}
-          {isIOS ? (
-            <div className="space-y-3">
-              <p className="text-sm text-gray-600 text-center">
-                Safari에서
-                <span className="inline-flex items-center mx-1 px-2 py-1 bg-gray-100 rounded-lg">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 4.658C17.886 17.938 17 18.482 17 19c0 1.657-3.134 3-7 3s-7-1.343-7-3c0-.518.886-1.062 1.684-1.484m13.632 0c1.238-.848 2.684-1.341 2.684-2.516 0-1.657-3.134-3-7-3s-7 1.343-7 3c0 1.175 1.446 1.668 2.684 2.516M9 13h6"
-                    />
-                  </svg>
-                </span>
-                버튼을 눌러
-              </p>
-              <p className="text-sm text-gray-600 text-center">
-                &quot;홈 화면에 추가&quot;를 선택하세요
-              </p>
-              <button
-                onClick={handleDismiss}
-                className="primary-button w-full rounded-lg px-4 py-3 font-semibold text-white"
-              >
-                알겠습니다
-              </button>
-            </div>
           ) : (
-            <div className="flex space-x-3">
-              <button
-                onClick={handleDismiss}
-                className="glass-button flex-1 rounded-lg px-4 py-3 font-medium text-[color:var(--text-secondary)]"
-              >
-                나중에
-              </button>
-              <button
-                onClick={handleInstall}
-                className="primary-button flex-1 rounded-lg px-4 py-3 font-semibold text-white"
-              >
-                설치하기
-              </button>
-            </div>
+            <button
+              onClick={handleInstall}
+              className="flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md bg-[color:var(--primary)] px-3 text-[13px] font-semibold text-white shadow-sm transition active:scale-[0.99]"
+            >
+              <FaPlus size={11} />
+              설치
+            </button>
           )}
+          <button
+            onClick={handleDismiss}
+            className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[color:var(--text-muted)] transition hover:bg-[rgba(115,87,106,0.08)] hover:text-[color:var(--text-primary)] active:scale-95"
+            aria-label="설치 안내 닫기"
+          >
+            <FaTimes size={13} />
+          </button>
         </div>
       </div>
-    </>
+    </div>
   );
-}
-
-// 애니메이션 스타일 추가
-const styles = `
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes slide-up {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
-  
-  .animate-fade-in {
-    animation: fade-in 0.3s ease-out;
-  }
-  
-  .animate-slide-up {
-    animation: slide-up 0.3s ease-out;
-  }
-`;
-
-// 스타일 주입
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style');
-  styleSheet.textContent = styles;
-  document.head.appendChild(styleSheet);
 }
