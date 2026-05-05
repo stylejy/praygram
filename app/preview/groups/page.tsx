@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { FaLink, FaPlus } from 'react-icons/fa';
 
 const mockGroups = [
   { id: '1', name: '청년부 기도모임', role: 'LEADER', created_at: '2024-01-15' },
@@ -26,14 +27,19 @@ export default function PreviewGroupsPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      <div className="glass-card w-full max-w-sm px-8 py-10 flex flex-col gap-6 fade-in rounded-3xl">
-        <h1 className="text-2xl font-light tracking-tight text-gray-900 text-center">
-          기도모임
-        </h1>
+    <main className="page-shell flex items-center justify-center">
+      <section className="content-panel max-w-md fade-in">
+        <div className="mb-6">
+          <p className="section-eyebrow">기도모임</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+            함께 기도할 모임을 선택하세요
+          </h1>
+        </div>
 
         {error && (
-          <p className="text-sm text-center text-red-500">{error}</p>
+          <p className="mb-4 rounded-lg border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-600">
+            {error}
+          </p>
         )}
 
         {/* Groups List */}
@@ -42,43 +48,46 @@ export default function PreviewGroupsPage() {
             <button
               key={group.id}
               onClick={() => router.push(`/preview`)}
-              className="glass-button w-full px-4 py-3.5 rounded-xl text-left flex items-center justify-between"
+              className="glass-button w-full rounded-lg px-4 py-4 text-left"
             >
-              <span className="text-sm font-medium text-gray-800 truncate">
-                {group.name}
-              </span>
-              <span className="text-xs text-gray-400 ml-3 shrink-0">
-                {group.role === 'LEADER' ? '관리자' : '멤버'}
+              <span className="flex min-w-0 items-center justify-between gap-3">
+                <span className="truncate text-sm font-semibold text-[color:var(--text-primary)]">
+                  {group.name}
+                </span>
+                <span className="shrink-0 rounded-full border border-[color:var(--accent-border)] bg-white/60 px-2.5 py-1 text-[11px] font-medium text-[color:var(--text-muted)]">
+                  {group.role === 'LEADER' ? '관리자' : '멤버'}
+                </span>
               </span>
             </button>
           ))}
         </div>
 
-        <div className="border-t border-gray-100/60" />
+        <div className="quiet-divider my-5" />
 
         {/* Create Form */}
         {activeForm === 'create' && (
           <div className="flex flex-col gap-3 slide-up">
+            <label className="field-label">새 기도모임</label>
             <input
               type="text"
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
               placeholder="기도모임 이름"
-              className="glass-input w-full px-4 py-3 rounded-xl text-gray-900 placeholder-gray-400 text-sm"
+              className="glass-input w-full rounded-lg px-4 py-3 text-sm text-[color:var(--text-primary)] placeholder-[color:var(--text-muted)]"
               maxLength={100}
               autoFocus
             />
             <div className="flex gap-3">
               <button
                 onClick={closeForm}
-                className="glass-button flex-1 py-3 rounded-xl text-sm font-medium text-gray-600"
+                className="glass-button flex-1 rounded-lg py-3 text-sm font-medium text-[color:var(--text-secondary)]"
               >
                 취소
               </button>
               <button
                 onClick={() => alert('미리보기 — 실제 저장되지 않습니다.')}
                 disabled={!newGroupName.trim()}
-                className="primary-button flex-1 py-3 rounded-xl text-sm font-medium text-white disabled:opacity-50"
+                className="primary-button flex-1 rounded-lg py-3 text-sm font-medium text-white disabled:opacity-50"
               >
                 만들기
               </button>
@@ -89,28 +98,29 @@ export default function PreviewGroupsPage() {
         {/* Join Form */}
         {activeForm === 'join' && (
           <div className="flex flex-col gap-3 slide-up">
+            <label className="field-label">초대 링크</label>
             <input
               type="text"
               value={inviteCode}
               onChange={(e) => setInviteCode(e.target.value)}
               placeholder="초대 링크 또는 아이디"
-              className="glass-input w-full px-4 py-3 rounded-xl text-gray-900 placeholder-gray-400 text-sm"
+              className="glass-input w-full rounded-lg px-4 py-3 text-sm text-[color:var(--text-primary)] placeholder-[color:var(--text-muted)]"
               autoFocus
             />
-            <button className="glass-button w-full py-2.5 rounded-xl text-sm font-medium text-gray-600">
+            <button className="glass-button w-full rounded-lg py-2.5 text-sm font-medium text-[color:var(--text-secondary)]">
               클립보드에서 붙여넣기
             </button>
             <div className="flex gap-3">
               <button
                 onClick={closeForm}
-                className="glass-button flex-1 py-3 rounded-xl text-sm font-medium text-gray-600"
+                className="glass-button flex-1 rounded-lg py-3 text-sm font-medium text-[color:var(--text-secondary)]"
               >
                 취소
               </button>
               <button
                 onClick={() => alert('미리보기 — 실제 저장되지 않습니다.')}
                 disabled={!inviteCode.trim()}
-                className="primary-button flex-1 py-3 rounded-xl text-sm font-medium text-white disabled:opacity-50"
+                className="primary-button flex-1 rounded-lg py-3 text-sm font-medium text-white disabled:opacity-50"
               >
                 참여하기
               </button>
@@ -120,22 +130,24 @@ export default function PreviewGroupsPage() {
 
         {/* Action Buttons */}
         {activeForm === 'none' && (
-          <div className="flex flex-col gap-3">
+          <div className="mt-5 flex flex-col gap-3">
             <button
               onClick={() => setActiveForm('join')}
-              className="glass-button w-full py-3 rounded-xl text-sm font-medium text-gray-700"
+              className="glass-button flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-[color:var(--text-secondary)]"
             >
+              <FaLink size={13} />
               초대 링크로 참여하기
             </button>
             <button
               onClick={() => setActiveForm('create')}
-              className="primary-button w-full py-3 rounded-xl text-sm font-medium text-white"
+              className="primary-button flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-white"
             >
+              <FaPlus size={13} />
               새 기도모임 만들기
             </button>
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

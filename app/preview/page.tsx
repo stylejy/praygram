@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { FaChevronLeft, FaPlus, FaRegHeart, FaShareAlt } from 'react-icons/fa';
 
 const mockPrayers = [
   {
@@ -76,37 +77,44 @@ function MockPraycard({ prayer }: { prayer: (typeof mockPrayers)[0] }) {
   };
 
   return (
-    <div className="glass-card p-6 rounded-2xl slide-up">
+    <div className="glass-card rounded-lg p-6 slide-up">
       {/* Author */}
       <div className="flex items-center space-x-2.5 mb-4">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border border-white/60">
-          <span className="text-gray-500 font-medium text-xs">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(115,87,106,0.14)] bg-[rgba(115,87,106,0.08)]">
+          <span className="text-xs font-semibold text-[color:var(--primary)]">
             {prayer.author_name.charAt(0)}
           </span>
         </div>
-        <span className="text-sm font-medium text-gray-600">{prayer.author_name}</span>
-        <span className="ml-auto text-xs text-gray-400">{getFormattedTime(prayer.created_at)}</span>
+        <span className="text-sm font-medium text-[color:var(--text-secondary)]">
+          {prayer.author_name}
+        </span>
+        <span className="ml-auto text-xs text-[color:var(--text-muted)]">
+          {getFormattedTime(prayer.created_at)}
+        </span>
       </div>
 
       {/* Content */}
       <div className="mb-5">
-        <h3 className="text-base font-semibold text-gray-900 mb-2 leading-snug">
+        <h3 className="mb-3 text-[17px] font-semibold leading-snug text-[color:var(--text-primary)]">
           {prayer.title}
         </h3>
-        <p className="text-sm text-gray-600 leading-relaxed">
+        <p className="text-[15px] leading-7 text-[color:var(--text-secondary)]">
           {prayer.content}
         </p>
       </div>
 
       {/* Action Bar */}
-      <div className="pt-4 border-t border-gray-100/60 flex items-center justify-between">
+      <div className="flex items-center justify-between border-t border-[rgba(115,87,106,0.1)] pt-4">
         <button
           onClick={handleReaction}
-          className="glass-button px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:scale-105 transition-all duration-200"
+          className="primary-button gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all duration-200"
         >
-          {hasEverPrayed ? '또 기도합니다' : '기도하기'}
+          <FaRegHeart size={13} />
+          {hasEverPrayed ? '계속 기도' : '함께 기도'}
         </button>
-        <span className="text-xs text-gray-400">{reactionCount}번 기도 받았습니다</span>
+        <span className="text-xs text-[color:var(--text-muted)]">
+          {reactionCount}명이 함께 기도
+        </span>
       </div>
 
       {showPrayEffect && (
@@ -131,30 +139,45 @@ export default function PreviewPage() {
   return (
     <div className="min-h-screen pb-28 md:pb-8">
       {/* Navbar */}
-      <nav
-        className="glass-navbar fixed inset-x-0 z-50 mx-4 flex items-center justify-between px-5 py-3.5 rounded-2xl"
-        style={{ top: '0.75rem' }}
-      >
-        <Link
-          href="/groups"
-          className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          ← 그룹
-        </Link>
-        <span className="text-sm font-semibold text-gray-900 tracking-tight">
-          청년부 기도모임
-        </span>
-        <span className="text-xs text-gray-400 bg-gray-100/60 px-2 py-0.5 rounded-full">
-          미리보기
-        </span>
+      <nav className="quiet-header fixed inset-x-0 top-0 z-50">
+        <div className="relative mx-auto flex h-[72px] w-full max-w-2xl items-center px-4 md:px-0">
+          <Link
+            href="/groups"
+            className="quiet-icon-button absolute left-[4.5px] top-1/2 shrink-0 -translate-y-1/2 md:-left-[14px]"
+            aria-label="그룹 목록으로 이동"
+          >
+            <FaChevronLeft size={13} />
+          </Link>
+          <div className="ml-12 min-w-0 flex-1">
+            <p className="text-[11px] font-medium leading-4 text-[color:var(--text-muted)]">
+              기도모임
+            </p>
+            <h1 className="truncate text-[17px] font-semibold leading-6 text-[color:var(--text-primary)]">
+              청년부 기도모임
+            </h1>
+          </div>
+          <span className="hidden shrink-0 rounded-full border border-[color:var(--accent-border)] bg-white/70 px-2.5 py-1 text-[11px] font-medium text-[color:var(--text-muted)] sm:inline-flex">
+            미리보기
+          </span>
+        </div>
       </nav>
 
       {/* Main Content */}
       <main className="pt-24 px-4 pb-4">
-        <div className="max-w-lg mx-auto">
-          <p className="text-center text-xs text-gray-400 mb-5">
-            총 {mockPrayers.length}개의 기도제목
-          </p>
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-4 flex items-end justify-between px-1">
+            <div>
+              <p className="text-sm font-semibold text-[color:var(--text-primary)]">
+                기도제목
+              </p>
+              <p className="mt-0.5 text-xs text-[color:var(--text-muted)]">
+                {mockPrayers.length}개의 마음이 올라왔어요
+              </p>
+            </div>
+            <span className="text-xs text-[color:var(--text-muted)]">
+              최근 순
+            </span>
+          </div>
           <div className="flex flex-col gap-4">
             {mockPrayers.map((prayer, index) => (
               <div key={prayer.id} className="slide-up" style={{ animationDelay: `${index * 0.06}s` }}>
@@ -170,10 +193,10 @@ export default function PreviewPage() {
         <div className="relative">
           <button
             onClick={handleInvite}
-            className="glass-button w-12 h-12 rounded-full flex items-center justify-center text-sm text-gray-600"
+            className="glass-button flex h-12 w-12 items-center justify-center rounded-full text-[color:var(--text-secondary)]"
             title="초대하기"
           >
-            공유
+            <FaShareAlt size={15} />
           </button>
           {showCopySuccess && (
             <div className="absolute bottom-full mb-2 right-0 bg-gray-800 text-white px-3 py-1.5 rounded-lg text-xs whitespace-nowrap slide-up">
@@ -183,21 +206,22 @@ export default function PreviewPage() {
         </div>
         <Link
           href="/preview/add"
-          className="primary-button w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-light"
+          className="primary-button flex h-12 w-12 items-center justify-center rounded-full text-white"
           title="기도제목 등록"
         >
-          +
+          <FaPlus size={16} />
         </Link>
       </div>
 
       {/* Mobile Bottom Bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-5 pt-2">
-        <div className="glass-navbar rounded-2xl p-3 flex items-center space-x-3">
+        <div className="glass-navbar flex items-center space-x-3 rounded-xl p-3">
           <div className="relative flex-1">
             <button
               onClick={handleInvite}
-              className="glass-button w-full py-3 rounded-xl text-sm font-medium text-gray-600"
+              className="glass-button w-full gap-2 rounded-lg py-3 text-sm font-medium text-[color:var(--text-secondary)]"
             >
+              <FaShareAlt size={13} />
               초대하기
             </button>
             {showCopySuccess && (
@@ -208,8 +232,9 @@ export default function PreviewPage() {
           </div>
           <Link
             href="/preview/add"
-            className="primary-button flex-1 py-3 rounded-xl text-sm font-medium text-white text-center"
+            className="primary-button flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-center text-sm font-medium text-white"
           >
+            <FaPlus size={13} />
             기도제목 등록
           </Link>
         </div>

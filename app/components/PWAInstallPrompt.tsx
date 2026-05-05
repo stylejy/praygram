@@ -108,23 +108,24 @@ export function PWAInstallPrompt() {
 
       {/* 설치 프롬프트 다이얼로그 */}
       <div className="fixed inset-x-4 bottom-4 z-50 max-w-md mx-auto animate-slide-up">
-        <div className="glass-card p-6 rounded-3xl shadow-xl">
+        <div className="glass-card rounded-lg p-6 shadow-xl">
           {/* 헤더 */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <PraygramLogo size="sm" />
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-[color:var(--text-primary)]">
                   Praygram 앱으로 설치
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-[color:var(--text-secondary)]">
                   홈 화면에서 빠르게 실행하세요
                 </p>
               </div>
             </div>
             <button
               onClick={handleDismiss}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="quiet-icon-button"
+              aria-label="설치 안내 닫기"
             >
               <svg
                 className="w-5 h-5"
@@ -144,16 +145,16 @@ export function PWAInstallPrompt() {
 
           {/* 특징 목록 */}
           <div className="space-y-2 mb-6">
-            <div className="flex items-center space-x-2 text-sm text-gray-700">
-              <span className="text-green-500">✓</span>
+            <div className="flex items-center space-x-2 text-sm text-[color:var(--text-secondary)]">
+              <span className="font-semibold text-[color:var(--primary)]">✓</span>
               <span>오프라인에서도 기도제목 확인</span>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-700">
-              <span className="text-green-500">✓</span>
+            <div className="flex items-center space-x-2 text-sm text-[color:var(--text-secondary)]">
+              <span className="font-semibold text-[color:var(--primary)]">✓</span>
               <span>빠른 앱 실행 및 알림 수신</span>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-700">
-              <span className="text-green-500">✓</span>
+            <div className="flex items-center space-x-2 text-sm text-[color:var(--text-secondary)]">
+              <span className="font-semibold text-[color:var(--primary)]">✓</span>
               <span>홈 화면에서 바로 접근</span>
             </div>
           </div>
@@ -185,7 +186,7 @@ export function PWAInstallPrompt() {
               </p>
               <button
                 onClick={handleDismiss}
-                className="primary-button w-full py-3 px-4 rounded-xl font-semibold text-white"
+                className="primary-button w-full rounded-lg px-4 py-3 font-semibold text-white"
               >
                 알겠습니다
               </button>
@@ -194,13 +195,13 @@ export function PWAInstallPrompt() {
             <div className="flex space-x-3">
               <button
                 onClick={handleDismiss}
-                className="glass-button flex-1 py-3 px-4 rounded-xl font-medium text-gray-700"
+                className="glass-button flex-1 rounded-lg px-4 py-3 font-medium text-[color:var(--text-secondary)]"
               >
                 나중에
               </button>
               <button
                 onClick={handleInstall}
-                className="primary-button flex-1 py-3 px-4 rounded-xl font-semibold text-white"
+                className="primary-button flex-1 rounded-lg px-4 py-3 font-semibold text-white"
               >
                 설치하기
               </button>

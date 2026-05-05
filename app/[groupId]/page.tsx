@@ -149,10 +149,20 @@ export default function GroupHome({ params }: Props) {
               </Link>
             </div>
           ) : prayers ? (
-            <div className="space-y-6 fade-in">
-              <p className="text-center text-sm text-gray-500 mb-2">
-                총 {prayers.length}개의 기도제목
-              </p>
+            <div className="space-y-4 fade-in">
+              <div className="mb-4 flex items-end justify-between px-1">
+                <div>
+                  <p className="text-sm font-semibold text-[color:var(--text-primary)]">
+                    기도제목
+                  </p>
+                  <p className="mt-0.5 text-xs text-[color:var(--text-muted)]">
+                    {prayers.length}개의 마음이 올라왔어요
+                  </p>
+                </div>
+                <span className="text-xs text-[color:var(--text-muted)]">
+                  최근 순
+                </span>
+              </div>
               {prayers.map((prayer, index) => (
                 <div
                   key={prayer.id}
@@ -194,11 +204,11 @@ export default function GroupHome({ params }: Props) {
 
       {/* Mobile Bottom Bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2">
-        <div className="glass-navbar rounded-2xl p-3 flex items-center space-x-3">
+        <div className="glass-navbar flex items-center space-x-3 rounded-xl p-3">
           <div className="relative flex-1">
             <button
               onClick={handleInvite}
-              className="glass-button w-full py-3 rounded-xl font-medium text-gray-700 flex items-center justify-center space-x-2"
+              className="glass-button flex w-full items-center justify-center space-x-2 rounded-lg py-3 font-medium text-[color:var(--text-secondary)]"
             >
               <FaShare size={14} />
               <span>초대하기</span>
@@ -211,7 +221,7 @@ export default function GroupHome({ params }: Props) {
           </div>
           <Link
             href={`/${groupId}/add`}
-            className="primary-button flex-1 py-3 rounded-xl font-medium text-white flex items-center justify-center space-x-2"
+            className="primary-button flex flex-1 items-center justify-center space-x-2 rounded-lg py-3 font-medium text-white"
           >
             <FaPlus size={14} />
             <span>기도제목 등록</span>

@@ -4,6 +4,8 @@ import { joinGroup } from '@/apis/members';
 import { useEffect, useCallback, useState } from 'react';
 import { PraygramLogo } from '@/app/components/PraygramLogo';
 import { createSupabaseBrowserClient } from '@/lib/supabase';
+import { LoadingSpinner } from '@/app/components/LoadingSpinner';
+import { FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 
 export default function JoinGroup() {
   const pathname = usePathname();
@@ -104,19 +106,19 @@ export default function JoinGroup() {
       case 'redirecting':
         return {
           icon: (
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-              <span className="text-2xl">✓</span>
+            <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-[color:var(--accent-border)] bg-white/70 text-[color:var(--primary)]">
+              <FaCheck size={18} />
             </div>
           ),
-          title: '참여 완료! 🎉',
+          title: '참여 완료',
           description: '기도모임으로 이동합니다',
           showSpinner: false,
         };
       case 'error':
         return {
           icon: (
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
-              <span className="text-2xl">⚠️</span>
+            <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-500">
+              <FaExclamationTriangle size={18} />
             </div>
           ),
           title: '참여 실패',
@@ -136,21 +138,22 @@ export default function JoinGroup() {
   const content = getStatusContent();
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="glass-card p-8 rounded-3xl text-center slide-up">
+    <main className="page-shell flex items-center justify-center">
+      <section className="content-panel max-w-md text-center slide-up">
           {content.icon}
 
           {content.showSpinner && (
-            <div className="flex items-center justify-center mb-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="mb-4 flex items-center justify-center">
+              <LoadingSpinner />
             </div>
           )}
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">
+          <h1 className="mb-3 text-2xl font-semibold text-[color:var(--text-primary)]">
             {content.title}
           </h1>
-          <p className="text-gray-600 mb-6">{content.description}</p>
+          <p className="mb-6 text-sm leading-6 text-[color:var(--text-secondary)]">
+            {content.description}
+          </p>
 
           {status === 'error' && (
             <div className="space-y-3">
@@ -161,20 +164,19 @@ export default function JoinGroup() {
                   setErrorMessage('');
                   processJoin(groupId);
                 }}
-                className="primary-button w-full py-3 px-4 rounded-xl font-semibold text-white hover:scale-105 transition-all duration-200"
+                className="primary-button w-full rounded-lg px-4 py-3 font-semibold text-white"
               >
                 다시 시도
               </button>
               <button
                 onClick={() => router.push('/groups')}
-                className="glass-button w-full py-3 px-4 rounded-xl font-medium text-gray-700 hover:scale-105 transition-all duration-200"
+                className="glass-button w-full rounded-lg px-4 py-3 font-medium text-[color:var(--text-secondary)]"
               >
                 기도모임 목록으로
               </button>
             </div>
           )}
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

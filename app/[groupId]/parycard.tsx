@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { addReaction, removeReaction } from '@/apis/reactions';
+import { addReaction } from '@/apis/reactions';
 import { getFormattedTime } from '@/lib/timeFormatter';
 import { queueOfflineAction, isOnline } from '@/lib/offlineStorage';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
 import { PrayerWithReactions } from '@/types/prayer';
 import { createSupabaseBrowserClient } from '@/lib/supabase';
+import { FaRegHeart } from 'react-icons/fa';
 
 interface Props {
   prayer: PrayerWithReactions & { is_offline?: boolean };
@@ -118,39 +119,39 @@ export default function Praycard(props: Props) {
   const isReactionDisabled = isReacting || prayer.is_offline;
 
   return (
-    <div className="glass-card p-6 rounded-2xl slide-up">
+    <div className="glass-card rounded-lg p-6 slide-up">
       {/* Header */}
       <div className="flex items-center space-x-2.5 mb-4">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border border-white/60">
-          <span className="text-gray-500 font-medium text-xs">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(115,87,106,0.14)] bg-[rgba(115,87,106,0.08)]">
+          <span className="text-xs font-semibold text-[color:var(--primary)]">
             {(prayer.author_name || prayer.author?.nickname || '익명')
               .charAt(0)}
           </span>
         </div>
-        <span className="text-sm font-medium text-gray-600">
+        <span className="text-sm font-medium text-[color:var(--text-secondary)]">
           {prayer.author_name || prayer.author?.nickname || '익명'}
         </span>
         {prayer.is_offline && (
           <span className="text-xs text-orange-500 ml-1">· 동기화 대기중</span>
         )}
-        <span className="ml-auto text-xs text-gray-400">
+        <span className="ml-auto text-xs text-[color:var(--text-muted)]">
           {getFormattedTimeDisplay(prayer.created_at)}
         </span>
       </div>
 
       {/* Content */}
       <div className="mb-5">
-        <h3 className="text-base font-semibold text-gray-900 mb-2 leading-snug">
+        <h3 className="mb-3 text-[17px] font-semibold leading-snug text-[color:var(--text-primary)]">
           {prayer.title}
         </h3>
-        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+        <p className="whitespace-pre-wrap text-[15px] leading-7 text-[color:var(--text-secondary)]">
           {prayer.content}
         </p>
       </div>
 
       {/* Action Bar */}
       <div
-        className={`pt-4 border-t border-gray-100/60 ${
+        className={`border-t border-[rgba(115,87,106,0.1)] pt-4 ${
           isMyPrayer ? 'flex justify-end' : 'flex items-center justify-between'
         }`}
       >
@@ -158,26 +159,27 @@ export default function Praycard(props: Props) {
           <button
             onClick={handleReactionClick}
             disabled={isReactionDisabled}
-            className={`glass-button px-4 py-2 rounded-xl text-sm font-medium text-gray-700 transition-all duration-200 flex items-center gap-2 ${
-              isReactionDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
+            className={`primary-button flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all duration-200 ${
+              isReactionDisabled ? 'cursor-not-allowed opacity-50' : ''
             }`}
           >
             {isReacting && <LoadingSpinner />}
-            {isReacting ? '처리 중...' : hasEverPrayed ? '또 기도합니다' : '기도하기'}
+            {!isReacting && <FaRegHeart size={13} />}
+            {isReacting ? '처리 중...' : hasEverPrayed ? '계속 기도' : '함께 기도'}
           </button>
         )}
 
-        <span className="text-xs text-gray-400">
-          {reactionCount}번 기도 받았습니다
+        <span className="text-xs text-[color:var(--text-muted)]">
+          {reactionCount}명이 함께 기도
         </span>
       </div>
 
       {/* Offline Notice */}
       {prayer.is_offline && (
-        <div className="mt-4 glass-card bg-orange-50/90 border-orange-200 p-3 rounded-xl">
+        <div className="glass-card mt-4 rounded-lg border-orange-200 bg-orange-50/90 p-3">
           <div className="flex items-center space-x-2">
             <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
-              <span className="text-white text-xs">⚠️</span>
+              <span className="text-xs font-bold text-white">!</span>
             </div>
             <p className="text-sm text-orange-800 font-medium">
               이 기도제목은 오프라인에서 작성되었습니다. 온라인 복구 시 자동으로

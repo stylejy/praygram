@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
-import { PraygramLogo } from '@/app/components/PraygramLogo';
 
 interface AuthUser {
   id: string;
@@ -20,8 +19,6 @@ export default function AuthPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [debugLog, setDebugLog] = useState<string[]>([]);
 
-  const supabaseBrowserClient = createSupabaseBrowserClient();
-
   const addDebugLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     setDebugLog((prev) => [...prev, `[${timestamp}] ${message}`]);
@@ -31,6 +28,7 @@ export default function AuthPage() {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        const supabaseBrowserClient = createSupabaseBrowserClient();
         addDebugLog('기존 세션 확인 중...');
         const {
           data: { session },
@@ -66,6 +64,7 @@ export default function AuthPage() {
       if (code) {
         addDebugLog('OAuth 콜백 코드 발견, 세션 교환 중...');
         try {
+          const supabaseBrowserClient = createSupabaseBrowserClient();
           const { data, error } =
             await supabaseBrowserClient.auth.exchangeCodeForSession(code);
           if (error) throw error;
@@ -94,6 +93,7 @@ export default function AuthPage() {
     try {
       setError(null);
       addDebugLog('카카오 로그인 시작');
+      const supabaseBrowserClient = createSupabaseBrowserClient();
 
       // 모바일 환경 감지
       const isMobile =
@@ -222,30 +222,36 @@ export default function AuthPage() {
   }, [authUser, isProcessing, router]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6">
-      <div className="glass-card w-full max-w-sm px-8 py-12 flex flex-col items-center gap-8 fade-in rounded-3xl">
-        <h1 className="text-3xl font-light tracking-tight text-gray-900">
-          Praygram
-        </h1>
+    <main className="page-shell flex items-center justify-center">
+      <section className="content-panel max-w-md px-7 py-10 fade-in">
+        <div className="mb-8">
+          <p className="section-eyebrow text-center">같이 기도하는 공간</p>
+          <h1 className="mt-2 text-center text-3xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+            Praygram
+          </h1>
+        </div>
 
         {authUser ? (
           <div className="flex flex-col items-center gap-4">
-            <h2 className="text-xl font-medium text-center leading-relaxed text-gray-900">
+            <h2 className="text-center text-xl font-semibold leading-relaxed text-[color:var(--text-primary)]">
               {authUser.name}님 <br /> 환영합니다!
             </h2>
-            <p className="text-sm text-gray-500">잠시 후 이동합니다</p>
+            <p className="text-sm text-[color:var(--text-muted)]">
+              잠시 후 이동합니다
+            </p>
             <LoadingSpinner />
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-4 w-full">
-            <p className="text-sm text-center text-gray-500">같이 기도하는 공간</p>
-
+          <div className="flex w-full flex-col items-center gap-4">
             {error && (
-              <p className="text-sm text-center text-red-500 leading-relaxed">
+              <p className="rounded-lg border border-red-200 bg-red-50/80 px-4 py-3 text-center text-sm leading-relaxed text-red-600">
                 {error}{' '}
                 <button
-                  onClick={() => { setError(null); setDebugLog([]); }}
-                  className="underline"
+                  onClick={() => {
+                    setError(null);
+                    setDebugLog([]);
+                  }}
+                  className="font-semibold underline"
                 >
                   다시 시도
                 </button>
@@ -255,7 +261,7 @@ export default function AuthPage() {
             <button
               onClick={loginWithKakao}
               disabled={isProcessing}
-              className="w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-2xl font-semibold text-gray-900 transition-transform active:scale-95 disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-3 rounded-lg px-6 py-3.5 font-semibold text-gray-900 transition-transform active:scale-[0.99] disabled:opacity-50"
               style={{ background: '#FEE500' }}
             >
               {isProcessing ? (
@@ -275,9 +281,12 @@ export default function AuthPage() {
                 </>
               )}
             </button>
+            <p className="mt-2 text-center text-xs leading-5 text-[color:var(--text-muted)]">
+              로그인 후 참여한 기도모임과 초대 링크를 이어서 확인할 수 있어요.
+            </p>
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
