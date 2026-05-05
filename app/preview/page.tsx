@@ -11,7 +11,7 @@ const mockPrayers = [
     content:
       '저의 친한 친구가 졸업 후 6개월째 취업을 준비하고 있습니다. 매일 지원서를 내고 있지만 계속 떨어지고 있어 많이 지쳐있습니다. 하나님의 좋은 인도하심이 있기를 기도해주세요.',
     author_name: '김민준',
-    created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    time_label: '30분 전',
     reaction_count: 12,
   },
   {
@@ -20,7 +20,7 @@ const mockPrayers = [
     content:
       '저희 어머니께서 지난주에 무릎 수술을 받으셨습니다. 수술은 잘 됐다고 하는데 회복이 더딘 편입니다. 빠른 회복과 합병증 없이 건강하게 낫기를 기도해주세요.',
     author_name: '이서연',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    time_label: '2시간 전',
     reaction_count: 24,
   },
   {
@@ -29,7 +29,7 @@ const mockPrayers = [
     content:
       '금요일에 팀 프로젝트 최종 발표가 있습니다. 몇 달간 열심히 준비했는데 긴장이 많이 됩니다. 평안한 마음으로 발표할 수 있도록, 그리고 좋은 결과가 있도록 기도 부탁드립니다.',
     author_name: '박지훈',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+    time_label: '5시간 전',
     reaction_count: 8,
   },
   {
@@ -38,7 +38,7 @@ const mockPrayers = [
     content:
       '다음 주부터 새 직장을 시작합니다. 새로운 환경, 새로운 동료들과 잘 어울리고 맡은 일을 잘 감당할 수 있도록 기도 부탁드립니다. 하나님이 주신 이 기회에 감사하며 최선을 다하고 싶습니다.',
     author_name: '최유진',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    time_label: '1일 전',
     reaction_count: 17,
   },
   {
@@ -47,22 +47,10 @@ const mockPrayers = [
     content:
       '오랫동안 가족 관계가 어려웠습니다. 특히 아버지와의 관계가 많이 멀어졌는데, 서로 이해하고 용서하며 회복될 수 있도록 기도해주세요. 하나님의 사랑이 가정 가운데 임하기를 원합니다.',
     author_name: '강동현',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    time_label: '2일 전',
     reaction_count: 31,
   },
 ];
-
-function getFormattedTime(timestamp: string): string {
-  const now = new Date();
-  const date = new Date(timestamp);
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 60) return `${diffMins}분 전`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}시간 전`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}일 전`;
-}
 
 function MockPraycard({ prayer }: { prayer: (typeof mockPrayers)[0] }) {
   const [reactionCount, setReactionCount] = useState(prayer.reaction_count);
@@ -89,7 +77,7 @@ function MockPraycard({ prayer }: { prayer: (typeof mockPrayers)[0] }) {
           {prayer.author_name}
         </span>
         <span className="ml-auto text-xs text-[color:var(--text-muted)]">
-          {getFormattedTime(prayer.created_at)}
+          {prayer.time_label}
         </span>
       </div>
 
@@ -163,7 +151,7 @@ export default function PreviewPage() {
       </nav>
 
       {/* Main Content */}
-      <main className="pt-24 px-4 pb-4">
+      <main className="pt-24 px-4 pb-36 md:pb-4">
         <div className="mx-auto max-w-2xl">
           <div className="mb-4 flex items-end justify-between px-1">
             <div>
@@ -214,15 +202,15 @@ export default function PreviewPage() {
       </div>
 
       {/* Mobile Bottom Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-5 pt-2">
-        <div className="glass-navbar flex items-center space-x-3 rounded-xl p-3">
-          <div className="relative flex-1">
+      <div className="fixed inset-x-0 bottom-0 z-50 bg-gradient-to-t from-[rgba(247,245,239,0.96)] via-[rgba(247,245,239,0.82)] to-transparent px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3 md:hidden">
+        <div className="mx-auto flex w-full max-w-2xl items-center gap-2 rounded-lg border border-[rgba(115,87,106,0.12)] bg-[rgba(255,254,250,0.92)] p-1.5 shadow-[0_10px_28px_rgba(51,56,49,0.12)] backdrop-blur-md">
+          <div className="relative min-w-0 flex-[0.9]">
             <button
               onClick={handleInvite}
-              className="glass-button w-full gap-2 rounded-lg py-3 text-sm font-medium text-[color:var(--text-secondary)]"
+              className="flex h-10 w-full min-w-0 items-center justify-center gap-1.5 rounded-md border border-[rgba(115,87,106,0.12)] bg-white/75 px-2 text-[13px] font-semibold text-[color:var(--text-secondary)] shadow-sm transition active:scale-[0.99]"
             >
-              <FaShareAlt size={13} />
-              초대하기
+              <FaShareAlt size={13} className="shrink-0" />
+              <span className="truncate">초대하기</span>
             </button>
             {showCopySuccess && (
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-3 py-1.5 rounded-lg text-xs whitespace-nowrap slide-up">
@@ -232,10 +220,10 @@ export default function PreviewPage() {
           </div>
           <Link
             href="/preview/add"
-            className="primary-button flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-center text-sm font-medium text-white"
+            className="flex h-10 min-w-0 flex-[1.1] items-center justify-center gap-1.5 rounded-md bg-[color:var(--primary)] px-2 text-center text-[13px] font-semibold text-white shadow-sm transition active:scale-[0.99]"
           >
-            <FaPlus size={13} />
-            기도제목 등록
+            <FaPlus size={13} className="shrink-0" />
+            <span className="truncate">기도제목 등록</span>
           </Link>
         </div>
       </div>

@@ -128,7 +128,7 @@ export default function GroupHome({ params }: Props) {
       <Navbar groupTitle={groupName} />
 
       {/* Main Content */}
-      <main className="pt-24 px-4 pb-20 md:pb-0">
+      <main className="pt-24 px-4 pb-36 md:pb-0">
         <div className="max-w-2xl mx-auto">
           {isLoading ? (
             <div className="text-center py-20 fade-in">
@@ -203,15 +203,15 @@ export default function GroupHome({ params }: Props) {
       </div>
 
       {/* Mobile Bottom Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2">
-        <div className="glass-navbar flex items-center space-x-3 rounded-xl p-3">
-          <div className="relative flex-1">
+      <div className="fixed inset-x-0 bottom-0 z-50 bg-gradient-to-t from-[rgba(247,245,239,0.96)] via-[rgba(247,245,239,0.82)] to-transparent px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3 md:hidden">
+        <div className="mx-auto flex w-full max-w-2xl items-center gap-2 rounded-lg border border-[rgba(115,87,106,0.12)] bg-[rgba(255,254,250,0.92)] p-1.5 shadow-[0_10px_28px_rgba(51,56,49,0.12)] backdrop-blur-md">
+          <div className="relative min-w-0 flex-[0.9]">
             <button
               onClick={handleInvite}
-              className="glass-button flex w-full items-center justify-center space-x-2 rounded-lg py-3 font-medium text-[color:var(--text-secondary)]"
+              className="flex h-10 w-full min-w-0 items-center justify-center gap-1.5 rounded-md border border-[rgba(115,87,106,0.12)] bg-white/75 px-2 text-[13px] font-semibold text-[color:var(--text-secondary)] shadow-sm transition active:scale-[0.99]"
             >
-              <FaShare size={14} />
-              <span>초대하기</span>
+              <FaShare size={13} className="shrink-0" />
+              <span className="truncate">초대하기</span>
             </button>
             {showCopySuccess && (
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap slide-up">
@@ -221,10 +221,10 @@ export default function GroupHome({ params }: Props) {
           </div>
           <Link
             href={`/${groupId}/add`}
-            className="primary-button flex flex-1 items-center justify-center space-x-2 rounded-lg py-3 font-medium text-white"
+            className="flex h-10 min-w-0 flex-[1.1] items-center justify-center gap-1.5 rounded-md bg-[color:var(--primary)] px-2 text-[13px] font-semibold text-white shadow-sm transition active:scale-[0.99]"
           >
-            <FaPlus size={14} />
-            <span>기도제목 등록</span>
+            <FaPlus size={13} className="shrink-0" />
+            <span className="truncate">기도제목 등록</span>
           </Link>
         </div>
       </div>
